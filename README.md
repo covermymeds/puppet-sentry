@@ -14,7 +14,8 @@ class { 'sentry': }
 ```
 
 A more realistic use case with roles and profiles might look like this.
-**role/manifests/sentry.pp**
+
+* **role/manifests/sentry.pp**
 ```
 class role::sentry {
 
@@ -24,7 +25,7 @@ class role::sentry {
 }
 ```
 
-**profile/manifests/sentry.pp**
+* **profile/manifests/sentry.pp**
 ```
 class profile::sentry {
 
@@ -37,7 +38,7 @@ class profile::sentry {
 }
 ```
 
-**hieradata/hosts/sentry.example.com.yaml**
+* **hieradata/hosts/sentry.example.com.yaml**
 ```
 ---
 classes:
