@@ -3,8 +3,9 @@ puppet-sentry
 
 [Sentry](https://www.getsentry.com) is "a modern error logging and aggregation platform."  This module installs the [on-premise](https://docs.getsentry.com/on-premise/) open source version of Sentry.
 
-Installation requires RHEL 7, and depends on Python and apache with `mod_wsgi`.  These module dependencies are explicitly listed.
-Sentry also requires a database (PostgreSQL), memcached, and Redis which are not included in this module. Checkout the modules we use to satify those dependencies below.
+Installation requires RHEL 7, and depends on Python and apache with `mod_wsgi`.  These module dependencies are explicitly listed. Sentry also requires a database (PostgreSQL), memcached, and Redis which are not included in this module. Please see the [Modules we use](#modules-we-use) to satify those dependencies below.
+
+If LDAP values are defined for Sentry, the [getsentry-ldap-auth](https://github.com/banno/getsentry-ldap-auth) plugin is installed.
 
 # Usage
 Install the latest version of Sentry.  The default configuration places all of the dependencies on localhost which is likely only useful for a development scenario.
@@ -13,18 +14,18 @@ class { 'sentry': }
 ```
 
 A more realistic use case with roles and profiles might look like this.
-```
 **role/manifests/sentry.pp**
-
+```
 class role::sentry {
 
   include profile::sentry
   include profile::memcached
 
 }
+```
 
 **profile/manifests/sentry.pp**
-
+```
 class profile::sentry {
 
   include profile::postgresql_client
@@ -34,9 +35,10 @@ class profile::sentry {
     Class['::sentry']
 
 }
+```
 
 **hieradata/hosts/sentry.example.com.yaml**
-
+```
 ---
 classes:
   - role::sentry
