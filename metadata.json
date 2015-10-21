@@ -1,0 +1,18 @@
+{
+  "name": "covermymeds-sentry",
+  "version": "1.0.0",
+  "author": "CoverMyMeds",
+  "license": "MIT",
+  "summary": "Install and configure Sentry",
+  "source": "https://git.innova-partners.com/puppet/sentry",
+  "project_page": "https://git.innova-partners.com/puppet/sentry",
+  "issues_url": "https://git.innova-partners.com/puppet/sentry/issues",
+  "tags": ["sentry", "getsentry"],
+  "operatingsystem_support": [
+    { "operatingsystem":"RedHat", "operatingsystemrelease":[ "7" ] }
+  ],
+  "dependencies": [
+    { "name": "puppetlabs/stdlib", "version_requirement": " >= 4.6.0" },
+    { "name": "puppetlabs/postgresql", "version_requirement": " >= 4.3.0" }
+  ]
+}

@@ -1,0 +1,61 @@
+#!<%= @path %>/bin/python
+
+import os, sys, site
+from optparse import OptionParser
+
+site.addsitedir('<%= @path %>')
+#site.addsitedir('<%= @path %>/lib/python2.7/site-packages')
+os.environ['SENTRY_CONF'] = '<%= @path %>/sentry.conf'
+
+
+from sentry.utils.runner import configure
+configure()
+
+from sentry.models import Organization, Project, Team, User
+# The admin user should have been created by Puppet prior to this script running.
+# We explicitly do not create one here so as not to store the admin password
+#    in this script. 
+try:
+  u = User.objects.get(email='<%= @admin_email %>')
+except:
+  print 'User <%= @admin_email %> does not exist!'
+  # exit with an error.
+  sys.exit(1)
+
+# make sure an organization exists
+try:
+  o = Organization.objects.get(name='<%= @organization %>')
+except:
+  o = Organization()
+  o.name  = '<%= @organization %>'
+  o.owner_id = u.id
+  o.save()
+
+try:
+  t = Team.objects.get(name='<%= @team %>')
+except:
+  t = Team()
+  t.name = '<%= @team %>'
+  t.owner_id = u.id
+  t.organization_id = o.id
+  t.save()
+
+try:
+  p = Project.objects.get(name='<%= @project %>')
+except:
+  p = Project()
+  p.name = '<%= @project %>'
+  p.organization_id = o.id
+  p.team_id = t.id
+  p.save()
+
+# Write the log only after everything has executed successfully,
+# because Puppet relies on the presence of the log file to continue
+# with Sentry configuration.
+log = open('<%= @path %>/bootstrap.log', 'a')
+log.write('Sentry version <%= @version %> bootstrap...')
+log.write('Organization <%= @organization %> created.')
+log.write('Team <%= @team %> created.')
+log.write('Project <%= @project %> created.')
+log.close()
+

@@ -1,0 +1,18 @@
+[Unit]
+Description=Sentry Worker
+After=network.target
+
+[Service]
+User=<%= @user %>
+Group=<%= @group %>
+Type=simple
+PIDFile=<%= @path %>/sentry-worker.pid
+Environment=VIRTUAL_ENV="<%= @path %>"
+Environment=PATH="$VIRTUAL_ENV/bin:$PATH"
+WorkingDirectory=<%= @path %>
+ExecStart=<%= @path %>/bin/sentry --config=<%= @path %>/sentry.conf celery worker -B -f /var/log/sentry/sentry-worker.log --pidfile=/<%= @path %>/sentry-worker.pid
+ExecStop=/bin/kill -KILL $MAINPID
+ExecReload=/bin/kill -HUP $MAINPID
+
+[Install]
+WantedBy=multi-user.target
