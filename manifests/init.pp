@@ -162,13 +162,22 @@ class sentry (
     require => File["${path}/sentry.conf"],
   }
 
+  # this creates the DSN file for each project, daily.
   cron { 'dsn_mapper':
     command => "${path}/bin/python ${path}/dsn_mapper.py",
     user    => root,
-    minute  => 5
+    minute  => 5,
+    hour    => 2,
   }
 
-  # Collect the projects from exported resources
+  # run the Sentry cleanup process daily
+  cron { 'sentry cleanup':
+    command => "${path}/bin/sentry --config=${path}/sentry.conf cleanup --days=30",
+    user    => $user,
+    minute  => 15,
+    hour    => 1,
+  }
+
   file { "${path}/create_project.py":
     ensure  => present,
     mode    => '0755',
@@ -176,6 +185,7 @@ class sentry (
     require => File["${path}/sentry.conf"],
   }
 
+  # Collect the projects from exported resources
   include sentry::server::collect
 
 }
