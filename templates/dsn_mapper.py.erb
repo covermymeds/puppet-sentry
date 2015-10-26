@@ -1,7 +1,7 @@
 import os, sys, site
 
-site.addsitedir('<%= @venv %>')
-os.environ['SENTRY_CONF'] = '<%= @venv %>/sentry.conf'
+site.addsitedir('<%= @path %>')
+os.environ['SENTRY_CONF'] = '<%= @path %>/sentry.conf'
 
 # Check to see if the project exists on the team
 from sentry.utils.runner import configure
