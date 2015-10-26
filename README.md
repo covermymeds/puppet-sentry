@@ -1,9 +1,7 @@
 puppet-sentry
 ======
 
-[Sentry](https://www.getsentry.com) is "a modern error logging and aggregation platform."  This module installs the [on-premise](https://docs.getsentry.com/on-premise/) open source version of Sentry.
-
-A Sentry administrative user, default Organization and default Team will be created.
+[Sentry](https://www.getsentry.com) is "a modern error logging and aggregation platform."  This module installs the [on-premise](https://docs.getsentry.com/on-premise/) open source version of Sentry. A Sentry administrative user, default Organization and default Team will be created.
 
 ## Dependencies
 This module supports only Red Hat Enterprise Linux 7 and its derivatives.
