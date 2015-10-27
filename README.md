@@ -13,7 +13,7 @@ The following modules are required:
 
 This module configures Sentry to use a PostgreSQL database, memcached, and Redis. The installation and configuration of these services are not managed by this module.  Please see the [Modules we use](#modules-we-use) to satify those dependencies below.
 
-If LDAP values are defined for the Sentry configuration, the [getsentry-ldap-auth](https://github.com/banno/getsentry-ldap-auth) plugin is installed.
+If an LDAP host is defined for the Sentry configuration, the [getsentry-ldap-auth](https://github.com/banno/getsentry-ldap-auth) plugin is activated.
 
 # Usage
 To install the latest version of Sentry with all default values:
@@ -108,6 +108,22 @@ Class parameters:
 * **version**: the Sentry version to install
 * **vhost**: the URL at which users will access the Sentry GUI
 * **wsgi_* **: mod_wsgi controls
+
+### sentry::install
+This class installs Sentry and its various dependencies. It will create the system user and group, install a Python virtualenv, several RPMs, and several `pip` packages. The [getsentry-ldap-auth](https://github.com/banno/getsentry-ldap-auth) plugin is installed, but will not be used unless an LDAP host is defined in `sentry::init`.
+
+This class will also handle upgrades to Sentry, when the `version` parameter defined here is different from the version installed.  The upgrade process is as automated as possible, but manual intervention may be required depending on your specific configuration.
+
+Class parameters:
+* **admin_email**: Sentry admin user email address
+* **admin_password**: Sentry admin user password
+* **group**: UNIX group to own Sentry files
+* **organization**: default Sentry organization to create
+* **path**: path into which to create virtualenv and install Sentry
+* **project**: initial Sentry project to create
+* **team**: default Sentry team to create
+* **user**: UNIX user to own Sentry files
+* **version**: version of Sentry to install
 
 ### sentry::service
 This class manages the Sentry background worker via `systemd`.
