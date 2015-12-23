@@ -47,7 +47,7 @@ class sentry::wsgi (
     default_vhost   => false,
     purge_configs   => true,
     service_restart => '/usr/sbin/apachectl graceful',
-    trace_enable    => Off,
+    trace_enable    => 'Off',
   }
   include apache::mod::alias
   include apache::mod::deflate
