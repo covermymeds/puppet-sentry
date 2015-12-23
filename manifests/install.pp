@@ -93,7 +93,7 @@ class sentry::install (
   }
 
   $pip_dependencies = [
-    'django_auth_ldap',
+    'django-auth-ldap',
     'hiredis',
     'nydus',
     'psycopg2',
