@@ -3,10 +3,15 @@
 # A defined type to wrap the export of a Sentry project
 #
 # === Paramaters
-# language: the Sentry language to use
-# tag: the tag to apply
+#
+# [*language*]: 
+#   the Sentry language to use
+#
+# [*env*]
+#   the tag to apply
 #
 # === Notes
+#
 # The language you suppy here is **not** validated.  Be sure to use
 # a value that is supported by Sentry.
 #
@@ -14,6 +19,7 @@
 #
 # Dan Sajner <dsajner@covermymeds.com>
 # Scott Merrill <smerrill@covermymeds.com>
+# Bill Schwanitz <bschwanitz@covermymeds.com>
 #
 # === Copyright
 #
@@ -21,7 +27,7 @@
 #
 define sentry::source::export (
   $language = 'Other',
-  $tag      = undef,
+  $env      = undef,
 ) {
 
   # Allow for a custom fact named appname_lang.
@@ -40,7 +46,7 @@ define sentry::source::export (
   @@sentry::source::project { "${name}-${::hostname}":
     project  => $name,
     platform => $real_lang,
-    tag      => $tag,
+    tag      => $env,
   }
 
 }
