@@ -159,7 +159,7 @@ This defined type exports a `sentry::source::project` resource.
 
 Type parameters:
 * **language**: the Sentry language to use
-* **tag**: the tag to apply
+* **env**: the tag to apply
 
 The `title` of this resource will be used to create a `sentry::source::project` resource of the form `${name}-${::hostname}`.  This allows multiple application servers to export the same application to Sentry, but ensures that only one Sentry project is created.
 
@@ -181,14 +181,14 @@ One of the goals of this module was hands-off creation of new Sentry projects fo
 Our application servers are classified with our `profile::appserver` class.  This class includes a custom fact that enumerates all of the applications deployed to the server.  We take this list of deployed applications and pass it as an array to `sentry::source::export` to create one exported resource for each application:
 ```
     sentry::source::export { $::deployed_apps:
-      tag => $::application_environment
+      env => $::application_environment
     }
 ```
 We tag the exported resources with another custom fact for the application environment (`production`, `testing`, etc).
 
 The `sentry::source::export` defined type simply exports a `sentry::source::project` defined type, with the important caveat that the application server's hostname is included in the exported resource title.  This ensures that each exported resource is unique.
 
-The main `sentry` class includes `sentry::server::collect`, which collects all of the exported `sentry::source::project` resources from our application servers, based on tag.  We have separate Sentry instances for production, testing, etc, so each Sentry server will only collect the `sentry::source::project`s that are appropriate for its environment.
+The main `sentry` class includes `sentry::server::collect`, which collects all of the exported `sentry::source::project` resources from our application servers, based on env.  We have separate Sentry instances for production, testing, etc, so each Sentry server will only collect the `sentry::source::project`s that are appropriate for its environment.
 
 The `sentry::source::project` is instantiated based on the `project` parameter.  Remember, the resource **title** is unique, by hostname, but the parameters need not be.  The Sentry server executes a simple Python script to create the project.  This script creates a file named after the project, containing the Sentry DSN for that project.
 

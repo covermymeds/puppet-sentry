@@ -2,7 +2,8 @@
 #
 # === Parameters
 #
-#  None
+#  [*env*]
+#    Value passed to tag, restricts where sentry server resources get collected
 #
 # === Actions:
 #
@@ -12,16 +13,17 @@
 # === Authors:
 #
 #  Dan Sajner <dsajner@covermymeds.com>
+#  Bil Schwanitz <bschwanitz@covermymeds.com>
 #
 # === Copyright
 #
 # Copyright 2014 CoverMyMeds, unless otherwise noted
 #
 class sentry::server::collect (
-  $tag = undef,
+  $env = undef,
 ) {
 
   # Collect all the Sentry Projects
-  ::Sentry::Source::Project <<| tag == $tag |>>
+  ::Sentry::Source::Project <<| tag == $env |>>
 
 }
