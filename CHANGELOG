@@ -1,3 +1,7 @@
+* Mon Jan 04 2016 Scott Merrill <smerrill@covermymeds.com> - 1.0.2
+- trace_enable is a string
+- change 'tag' to 'env'
+- use 'w' instead of 'a' in dsn_mapper.py
 * Mon Oct 26 2015 Scott Merrill <smerrill@covermymeds.com> - 1.0.1
 - update metadata.json
 * Mon Oct 26 2015 Scott Merrill <smerrill@covermymeds.com> - 1.0.0
