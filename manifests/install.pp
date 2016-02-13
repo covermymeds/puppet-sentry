@@ -7,6 +7,7 @@
 # admin_email: Sentry admin user email address
 # admin_password: Sentry admin user password
 # group: UNIX group to own Sentry files
+# ldap_auth_version: version of the sentry-ldap-auth plugin to install
 # organization: default Sentry organization to create
 # path: path into which to create virtualenv and install Sentry
 # project: initial Sentry project to create
@@ -24,15 +25,16 @@
 # Copyright 2015 CoverMyMeds
 #
 class sentry::install (
-  $admin_email    = $sentry::admin_email,
-  $admin_password = $sentry::admin_password,
-  $group          = $sentry::group,
-  $organization   = $sentry::organization,
-  $path           = $sentry::path,
-  $project        = $sentry::project,
-  $team           = $sentry::team,
-  $user           = $sentry::user,
-  $version        = $sentry::version,
+  $admin_email       = $sentry::admin_email,
+  $admin_password    = $sentry::admin_password,
+  $group             = $sentry::group,
+  $organization      = $sentry::organization,
+  $path              = $sentry::path,
+  $project           = $sentry::project,
+  $ldap_auth_version = $sentry::ldap_auth_version,
+  $team              = $sentry::team,
+  $user              = $sentry::user,
+  $version           = $sentry::version,
 ) {
 
   group { $group:
@@ -110,9 +112,10 @@ class sentry::install (
 
   # we install this *after* Sentry to ensure that a newer version of
   # Sentry is installed.  This only requires 4.3.0, so Pip's dependency
-  # resolution may may install an older version of Sentry, which would
+  # resolution may install an older version of Sentry, which would
   # then be promptly upgraded.
   python::pip { 'sentry-ldap-auth':
+    version => $ldap_auth_version,
     require => Python::Pip['sentry'],
   }
 
