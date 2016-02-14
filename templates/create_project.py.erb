@@ -46,7 +46,7 @@ def main():
 
   # try to load the requested team
   try:
-    t = Team.objects.get(name=options.team)
+    t = Team.objects.get(name=options.team,organization_id=o.id)
   except:
     # this team does not yet exist.  Create it.
     t = Team()
@@ -55,7 +55,7 @@ def main():
     t.owner_id = u.id
     t.save()
     # reload the object
-    t = Team.objects.get(name=options.team)
+    t = Team.objects.get(name=options.team,organization_id=o.id)
 
   try:
     p = Project.objects.get(name=options.project,team_id=t.id)
@@ -64,7 +64,7 @@ def main():
 
   if p:
     if options.verbose:
-      print 'Project %s exists in team %s' % (options.project, options.team)
+      print 'Project %s exists in team %s' % (options.project, t.name)
     sys.exit(1)
 
   # the project doesn't exist.  Create it!
@@ -87,18 +87,17 @@ def main():
 
   # create a static file containing this application's DSN
   k = ProjectKey.objects.get(project_id=p.id).get_dsn()
-  if options.organization == '<%= @organization %>' and options.team == '<%= @team %>':
-    subdir = ''
-  else:
+  prefix = ''
+  if options.organization != '<%= @organization %>' or options.team != '<%= @team %>':
     # this project does not live in the default org+team, so create the
-    # DSN file in a url-encoded directory of "organization/team"
-    subdir = quote(o.name + "/" + t.name + "/")
-  dsn = open('<%= @path %>/dsn/' + subdir + p.name, 'a')
+    # DSN file with a url-encoded prefix of "organization-team-"
+    prefix = quote(o.name.lower() + "-" + t.name.lower() + "-")
+  dsn = open('<%= @path %>/dsn/' + prefix + p.name, 'a')
   dsn.write(k)
   dsn.close()
 
   if options.verbose:
-    print "Project %s created in team %s." % (options.project, options.team)
+    print "Project %s created in team %s." % (options.project, t.name)
 
 if __name__ == "__main__":
   main()

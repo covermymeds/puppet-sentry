@@ -19,6 +19,7 @@
 #
 # Copyright 2015 CoverMyMeds
 #
+# lint:ignore:parameter_documentation
 define sentry::source::project (
   $organization,
   $project,
@@ -26,9 +27,30 @@ define sentry::source::project (
   $team,
   $path = $::sentry::path,
 ) {
+# lint:endignore
+
+  # normalize the project name to lowercase
+  $proj = downcase($project)
+
+  if ($organization == $::sentry::organization) and ($team == $::sentry::team) {
+    # if this project is being created in the default team, just use
+    # the project name for the Exec resource and the DSN cache file.
+    $p = $proj
+  } else {
+    # if this project is not in the default organization and team,
+    # set the DSN cache file to use the full org + team + project.
+    # Be sure the uriescape the resulting string!
+    $o = downcase($organization)
+    $t = downcase($team)
+    $p = uriescape("${o}-${t}-${proj}")
+  }
 
   # create exactly one project, regardless of how many app
   # servers might be running the corresponding application.
+  #
+  # We use the full combination of org/team/project because
+  # the same project name might exist in different organizations
+  # or teams.
   #
   # We use `if ! defined` here because we don't want catalog
   # compilation to fail in the event that a project's platform
@@ -36,19 +58,8 @@ define sentry::source::project (
   # unexpected error, or by intentional operator decision.
   #
 
-  if ($organization == $::sentry::organization) and ($team == $::sentry::team) {
-    # if this project is being created in the default team, just use
-    # the project name for the Exec resource and the DSN cache file.
-    $p = $project
-  } else {
-    # if this project is being created in a new team, create a namespace
-    # using "team/project" format. This will be used for the Exec and
-    # the DSN cache file.  Be sure the uriescape the resulting string!
-    $p = uriescape("${organization}/${team}/${project}")
-  }
-
-  if ! defined( Exec["Add ${p}"] ) {
-    exec { "Add ${p}":
+  if ! defined( Exec["Add ${organization}-${team}-${project}"] ) {
+    exec { "Add ${organization}-${team}-${project}":
       command => "${path}/bin/python ${path}/create_project.py -o ${organization} -t ${team} -l ${platform} -p ${project}",
       creates => "${path}/dsn/${p}",
       require => File["${path}/create_project.py"],

@@ -50,12 +50,28 @@ define sentry::source::export (
     $real_lang = $language
   }
 
+  if (! $organization) or ($organization == '') {
+    # an empty string or "undef" was passed. Use the default
+    # organization.
+    $o = $::sentry::organization
+  } else {
+    $o = $organization
+  }
+
+  if (! $team) or ($team == '') {
+    # an empty string or "undef" was passed. Use the default team.
+    $t = $::sentry::team
+  } else {
+    $t = $team
+  }
+
   # Export a Sentry project. Resource has the hostname so its unique.
   @@sentry::source::project { "${name}-${::hostname}":
-    project  => $name,
-    platform => $real_lang,
-    team     => $team,
-    tag      => $env,
+    organization => $o,
+    project      => $name,
+    platform     => $real_lang,
+    team         => $t,
+    tag          => $env,
   }
 
 }

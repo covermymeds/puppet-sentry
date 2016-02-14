@@ -1,4 +1,5 @@
 import os, sys, site
+from urllib import quote
 
 site.addsitedir('<%= @path %>')
 os.environ['SENTRY_CONF'] = '<%= @path %>/sentry.conf'
@@ -6,12 +7,20 @@ os.environ['SENTRY_CONF'] = '<%= @path %>/sentry.conf'
 # Check to see if the project exists on the team
 from sentry.utils.runner import configure
 configure()
-from sentry.models import Project, ProjectKey
+from sentry.models import Organization, Team, Project, ProjectKey
+
+# load up the default organization and team
+org = Organization.objects.get(name='<%= @organization %>')
+team = Team.objects.get(name='<%= @team %>',organization_id=org.id)
 
 for project in Project.objects.all():
   doit = False
   if project.id and (not project.is_internal_project()):
-    dsn_file = '<%= @path %>/dsn/' + project.name.lower()
+    if (project.organization_id == org.id) and (project.team_id == team.id):
+      prefix = ''
+    else:
+      prefix = quote(project.organization.name.lower() + "-" + project.team.name.lower() + "-")
+    dsn_file = '<%= @path %>/dsn/' + prefix + project.name.lower()
     try:
       dsn = ProjectKey.objects.get(project_id=project.id).get_dsn()
     except:
