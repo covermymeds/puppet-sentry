@@ -45,9 +45,9 @@ define sentry::source::export (
   # module.  You're on your own to create and use it.
   $override_language = getvar("${name}_lang")
   if $override_language {
-    $real_lang = $override_language
+    $l = $override_language
   } else {
-    $real_lang = $language
+    $l = $language
   }
 
   if (! $organization) or ($organization == '') {
@@ -69,7 +69,7 @@ define sentry::source::export (
   @@sentry::source::project { "${name}-${::hostname}":
     organization => $o,
     project      => $name,
-    platform     => $real_lang,
+    platform     => $l,
     team         => $t,
     tag          => $env,
   }
