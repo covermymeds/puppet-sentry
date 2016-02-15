@@ -32,7 +32,7 @@ class sentry::service (
 
   file { '/etc/systemd/system/sentry-worker.service':
     ensure  => present,
-    mode    => '0755',
+    mode    => '0644',
     owner   => 'root',
     group   => 'root',
     content => template('sentry/sentry-worker.service.erb'),
