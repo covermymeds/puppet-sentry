@@ -115,7 +115,7 @@ class sentry::install (
   # resolution may install an older version of Sentry, which would
   # then be promptly upgraded.
   python::pip { 'sentry-ldap-auth':
-    version => $ldap_auth_version,
+    ensure  => $ldap_auth_version,
     require => Python::Pip['sentry'],
   }
 
