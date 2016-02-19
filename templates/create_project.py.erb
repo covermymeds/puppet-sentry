@@ -87,11 +87,7 @@ def main():
 
   # create a static file containing this application's DSN
   k = ProjectKey.objects.get(project_id=p.id).get_dsn()
-  prefix = ''
-  if options.organization != '<%= @organization %>' or options.team != '<%= @team %>':
-    # this project does not live in the default org+team, so create the
-    # DSN file with a url-encoded prefix of "organization-team-"
-    prefix = quote(o.name.lower() + "-" + t.name.lower() + "-")
+  prefix = quote(o.name.lower() + "-" + t.name.lower() + "-")
   dsn = open('<%= @path %>/dsn/' + prefix + p.name, 'a')
   dsn.write(k)
   dsn.close()

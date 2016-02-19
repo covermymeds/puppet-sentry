@@ -32,10 +32,10 @@
 # Copyright 2015 CoverMyMeds
 #
 define sentry::source::export (
-  $language     = 'Other',
-  $organization = $::sentry::organization,
-  $team         = $::sentry::team,
-  $env          = undef,
+  $organization,
+  $team,
+  $env,
+  $language = 'Other',
 ) {
 
   # Allow for a custom fact named appname_lang.
@@ -45,32 +45,17 @@ define sentry::source::export (
   # module.  You're on your own to create and use it.
   $override_language = getvar("${name}_lang")
   if $override_language {
-    $l = $override_language
+    $real_lang = $override_language
   } else {
-    $l = $language
-  }
-
-  if (! $organization) or ($organization == '') {
-    # an empty string or "undef" was passed. Use the default
-    # organization.
-    $o = $::sentry::organization
-  } else {
-    $o = $organization
-  }
-
-  if (! $team) or ($team == '') {
-    # an empty string or "undef" was passed. Use the default team.
-    $t = $::sentry::team
-  } else {
-    $t = $team
+    $real_lang = $language
   }
 
   # Export a Sentry project. Resource has the hostname so its unique.
   @@sentry::source::project { "${name}-${::hostname}":
-    organization => $o,
+    organization => $organization,
     project      => $name,
-    platform     => $l,
-    team         => $t,
+    platform     => $real_lang,
+    team         => $team,
     tag          => $env,
   }
 
