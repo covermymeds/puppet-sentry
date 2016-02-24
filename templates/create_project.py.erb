@@ -47,7 +47,7 @@ def main():
   # try to load the requested team
   try:
     t = Team.objects.get(name=options.team,organization_id=o.id)
-  except:
+  except Team.DoesNotExist:
     # this team does not yet exist.  Create it.
     t = Team()
     t.name = options.team
