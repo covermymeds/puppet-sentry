@@ -32,10 +32,10 @@
 # Copyright 2015 CoverMyMeds
 #
 define sentry::source::export (
-  $organization,
-  $team,
-  $env,
-  $language = 'Other',
+  String $organization,
+  String $team,
+  String $env,
+  String $language = 'Other',
 ) {
 
   # Allow for a custom fact named appname_lang.

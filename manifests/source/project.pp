@@ -21,11 +21,11 @@
 #
 # lint:ignore:parameter_documentation
 define sentry::source::project (
-  $organization,
-  $project,
-  $platform,
-  $team,
-  $path = $::sentry::path,
+  String $organization,
+  String $project,
+  String $platform,
+  String $team,
+  String $path = $::sentry::path,
 ) {
 # lint:endignore
 
