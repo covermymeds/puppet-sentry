@@ -4,6 +4,7 @@
 #
 import os, sys, site
 from optparse import OptionParser
+from urllib import quote
 
 site.addsitedir('<%= @path %>')
 os.environ['SENTRY_CONF'] = '<%= @path %>/sentry.conf'
@@ -31,25 +32,39 @@ def main():
   if not options.platform:
     parser.error("Platform is required")
 
+  # try to load the requested organization
+  # and the admin user, who will own all new projects and teams
   e = False
   try:  
     o = Organization.objects.get(name=options.org)
-    t = Team.objects.get(name=options.team)
+    u = User.objects.get(email='<%= @admin_email %>')
   except:
     e = sys.exc_info()[0]
-
   if e:
     print "Error loading Sentry environment: %s" % (e)
     sys.exit(1)
 
+  # try to load the requested team
   try:
-    p = Project.objects.get(name=options.project)
+    t = Team.objects.get(name=options.team,organization_id=o.id)
+  except Team.DoesNotExist:
+    # this team does not yet exist.  Create it.
+    t = Team()
+    t.name = options.team
+    t.organization_id = o.id
+    t.owner_id = u.id
+    t.save()
+    # reload the object
+    t = Team.objects.get(name=options.team,organization_id=o.id)
+
+  try:
+    p = Project.objects.get(name=options.project,team_id=t.id)
   except:
     p = False
 
   if p:
     if options.verbose:
-      print 'Project exists: %s' % (options.project)
+      print 'Project %s exists in team %s' % (options.project, t.name)
     sys.exit(1)
 
   # the project doesn't exist.  Create it!
@@ -72,12 +87,13 @@ def main():
 
   # create a static file containing this application's DSN
   k = ProjectKey.objects.get(project_id=p.id).get_dsn()
-  dsn = open('<%= @path %>/dsn/' + p.name, 'a')
+  prefix = quote(o.name.lower() + "-" + t.name.lower() + "-")
+  dsn = open('<%= @path %>/dsn/' + prefix + p.name, 'a')
   dsn.write(k)
   dsn.close()
 
   if options.verbose:
-    print "Project %s created." % (options.project)
+    print "Project %s created in team %s." % (options.project, t.name)
 
 if __name__ == "__main__":
   main()

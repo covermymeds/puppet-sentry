@@ -4,9 +4,11 @@
 # doesn't exist.
 #
 # === Parameters
+# organization: the organization to which this project is assigned
 # project: the name of the project
 # platform: the language used by this project
 # path: the virtualenv path to use for Sentry
+# team: the team to which the project is assigned
 #
 # === Authors
 #
@@ -17,33 +19,38 @@
 #
 # Copyright 2015 CoverMyMeds
 #
+# lint:ignore:parameter_documentation
 define sentry::source::project (
-  $project,
-  $platform,
-  $path = $::sentry::path,
+  String $organization,
+  String $project,
+  String $platform,
+  String $team,
+  String $path = $::sentry::path,
 ) {
+# lint:endignore
+
+  # normalize the inputs to lowercase
+  $proj = downcase($project)
+  $o = downcase($organization)
+  $t = downcase($team)
+  $p = uriescape("${o}-${t}-${proj}")
 
   # create exactly one project, regardless of how many app
   # servers might be running the corresponding application.
+  #
+  # We use the full combination of org/team/project because
+  # the same project name might exist in different organizations
+  # or teams.
   #
   # We use `if ! defined` here because we don't want catalog
   # compilation to fail in the event that a project's platform
   # changes for any reason. Such a change might be due to an
   # unexpected error, or by intentional operator decision.
   #
-  # Projects are created in the default organization and team
-  # as defined in the `sentry::init`.  Multiple projects can use
-  # the same name as long as they are in different teams (or
-  # organizations).  This requires manual modification of projects
-  # after they have been created, and is outside the scope of
-  # this module.  Additionally, automatic creation of a new project
-  # may fail if a prior project of the same name still has a DSN file
-  # present at `${path}/dsn/${project}`
-
-  if ! defined( Exec["Add ${project}"] ) {
-    exec { "Add ${project}":
-      command => "${path}/bin/python ${path}/create_project.py -p ${project} -l ${platform}",
-      creates => "${path}/dsn/${project}",
+  if ! defined( Exec["Add ${organization}-${team}-${project}"] ) {
+    exec { "Add ${organization}-${team}-${project}":
+      command => "${path}/bin/python ${path}/create_project.py -o ${organization} -t ${team} -l ${platform} -p ${project}",
+      creates => "${path}/dsn/${p}",
       require => File["${path}/create_project.py"],
     }
   }

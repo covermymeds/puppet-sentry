@@ -7,6 +7,12 @@
 # [*language*]: 
 #   the Sentry language to use
 #
+# [*organization*]:
+#   the organization to which the project is assigned
+#
+# [*team*]:
+#   the team to which this project is assigned
+#
 # [*env*]
 #   the tag to apply
 #
@@ -26,8 +32,10 @@
 # Copyright 2015 CoverMyMeds
 #
 define sentry::source::export (
-  $language = 'Other',
-  $env      = undef,
+  String $organization,
+  String $team,
+  String $env,
+  String $language = 'Other',
 ) {
 
   # Allow for a custom fact named appname_lang.
@@ -44,9 +52,11 @@ define sentry::source::export (
 
   # Export a Sentry project. Resource has the hostname so its unique.
   @@sentry::source::project { "${name}-${::hostname}":
-    project  => $name,
-    platform => $real_lang,
-    tag      => $env,
+    organization => $organization,
+    project      => $name,
+    platform     => $real_lang,
+    team         => $team,
+    tag          => $env,
   }
 
 }

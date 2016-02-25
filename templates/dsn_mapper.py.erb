@@ -1,4 +1,5 @@
 import os, sys, site
+from urllib import quote
 
 site.addsitedir('<%= @path %>')
 os.environ['SENTRY_CONF'] = '<%= @path %>/sentry.conf'
@@ -11,7 +12,8 @@ from sentry.models import Project, ProjectKey
 for project in Project.objects.all():
   doit = False
   if project.id and (not project.is_internal_project()):
-    dsn_file = '<%= @path %>/dsn/' + project.name.lower()
+    prefix = quote(project.organization.name.lower() + "-" + project.team.name.lower() + "-")
+    dsn_file = '<%= @path %>/dsn/' + prefix + project.name.lower()
     try:
       dsn = ProjectKey.objects.get(project_id=project.id).get_dsn()
     except:
