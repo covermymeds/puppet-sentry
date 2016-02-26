@@ -1,6 +1,6 @@
 {
   "name": "covermymeds-sentry",
-  "version": "1.0.2",
+  "version": "2.0.0",
   "author": "CoverMyMeds",
   "license": "MIT",
   "summary": "Install and configure Sentry",

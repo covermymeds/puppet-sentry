@@ -158,10 +158,14 @@ This allows for applications to create Sentry projects and DSNs automatically.
 This defined type exports a `sentry::source::project` resource.
 
 Type parameters:
+* **organization**: The Sentry organization to use.  Required.  No default.
+* **team**: The Sentry team to use.  Required.  No default.
 * **language**: the Sentry language to use
 * **env**: the tag to apply
 
 The `title` of this resource will be used to create a `sentry::source::project` resource of the form `${name}-${::hostname}`.  This allows multiple application servers to export the same application to Sentry, but ensures that only one Sentry project is created.
+
+`organization` and `team` are required parameters.  The organization must exist, however, if the team does not exist it will be created.  We don't have a need for dynamically creating new organization which is why its not supported at this time.
 
 This defined type looks for a custom fact named `${name}_lang`.  If found, the value of this fact will be used for this project's language, regardless of any `$language` class parameter defined.  This custom fact **is not** included in this module.  An example is available in the `examples` directory.
 
@@ -171,6 +175,8 @@ This defined type defines a Sentry project.
 For each `sentry::source::project`, a Sentry project will be created in the default Organization and Team.  
 
 Type parameters:
+* **organization**: The Sentry organization to use.  Required.  No default.
+* **team**: The Sentry team to use.  Required.  No default.
 * **project**: the name of the project
 * **platform**: the language used by this project
 * **path**: the virtualenv path to use for Sentry
@@ -181,7 +187,9 @@ One of the goals of this module was hands-off creation of new Sentry projects fo
 Our application servers are classified with our `profile::appserver` class.  This class includes a custom fact that enumerates all of the applications deployed to the server.  We take this list of deployed applications and pass it as an array to `sentry::source::export` to create one exported resource for each application:
 ```
     sentry::source::export { $::deployed_apps:
-      env => $::application_environment
+      organization => hiera(sentry::organization)
+      team         => hiera(sentry::team)
+      env          => $::application_environment
     }
 ```
 We tag the exported resources with another custom fact for the application environment (`production`, `testing`, etc).
