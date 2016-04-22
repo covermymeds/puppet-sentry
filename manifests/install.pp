@@ -122,6 +122,7 @@ class sentry::install (
 
   # Install any extensions we might have been given. We install these
   # *after* Sentry to ensure the correct version of Sentry is installed
+  validate_array($extensions)
   $extensions.each |String $extension| {
     python::pip { $extension:
       require => Python::Pip['sentry'],
