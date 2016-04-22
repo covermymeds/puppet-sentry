@@ -35,6 +35,7 @@ class sentry::install (
   $team              = $sentry::team,
   $user              = $sentry::user,
   $version           = $sentry::version,
+  $extensions        = $sentry::extensions,
 ) {
 
   group { $group:
@@ -117,6 +118,14 @@ class sentry::install (
   python::pip { 'sentry-ldap-auth':
     ensure  => $ldap_auth_version,
     require => Python::Pip['sentry'],
+  }
+
+  # Install any extensions we might have been given. We install these
+  # *after* Sentry to ensure the correct version of Sentry is installed
+  $extensions.each |String $extension| {
+    python::pip { $extension:
+      require => Python::Pip['sentry'],
+    }
   }
 
   # this exec will handle creating a new database, as well as upgrading

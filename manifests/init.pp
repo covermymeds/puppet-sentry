@@ -62,6 +62,8 @@
 #
 # wsgi_*: mod_wsgi controls
 #
+# extensions: array of sentry extensions to install (sentry-github)
+#
 # === Authors
 # Dan Sajner <dsajner@covermymeds.com>
 # Scott Merrill <smerrill@covermymeds.com>
@@ -113,6 +115,7 @@ class sentry (
   $vhost             = $sentry::params::vhost,
   $wsgi_processes    = $sentry::params::wsgi_processes,
   $wsgi_threads      = $sentry::params::wsgi_threads,
+  $extensions        = $sentry::params::extensions,
 ) inherits ::sentry::params {
 
   # Install Sentry
@@ -127,6 +130,7 @@ class sentry (
     team              => $team,
     user              => $user,
     version           => $version,
+    extensions        => $extensions,
   }
 
   file { "${path}/sentry.conf":
