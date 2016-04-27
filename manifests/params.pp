@@ -41,4 +41,5 @@ class sentry::params {
   $vhost             = $::fqdn
   $wsgi_processes    = 1
   $wsgi_threads      = 15
+  $extensions        = []
 }
