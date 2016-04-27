@@ -73,6 +73,9 @@ sentry::team: 'Default Team Name'
 sentry::secret_key: <some secret key>
 sentry::path: '/var/lib/sentry'
 sentry::version: '7.7.1'
+sentry::extensions:
+  - sentry-github
+  - sentry-hipchat
 ```
 
 ## Classes
@@ -108,6 +111,7 @@ Class parameters:
 * **version**: the Sentry version to install
 * **vhost**: the URL at which users will access the Sentry GUI
 * **wsgi_* **: mod_wsgi controls
+* **extensions**: array of sentry extensions to install
 
 ### sentry::install
 This class installs Sentry and its various dependencies. It will create the system user and group, install a Python virtualenv, several RPMs, and several `pip` packages. The [getsentry-ldap-auth](https://github.com/banno/getsentry-ldap-auth) plugin is installed, but will not be used unless an LDAP host is defined in `sentry::init`.
@@ -124,6 +128,7 @@ Class parameters:
 * **team**: default Sentry team to create
 * **user**: UNIX user to own Sentry files
 * **version**: version of Sentry to install
+* **extensions**: array of sentry extensions to install
 
 ### sentry::service
 This class manages the Sentry background worker via `systemd`.
