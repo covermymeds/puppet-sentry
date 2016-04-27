@@ -14,6 +14,7 @@
 # team: default Sentry team to create
 # user: UNIX user to own Sentry files
 # version: version of Sentry to install
+# extensions: array of sentry extensions to install
 #
 # === Authors
 #
