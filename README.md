@@ -73,6 +73,9 @@ sentry::team: 'Default Team Name'
 sentry::secret_key: <some secret key>
 sentry::path: '/var/lib/sentry'
 sentry::version: '7.7.1'
+sentry::extensions:
+  - sentry-github
+  - sentry-hipchat
 ```
 
 ## Classes
