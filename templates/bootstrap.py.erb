@@ -5,9 +5,8 @@ from optparse import OptionParser
 
 # Add the project to the python path
 activate_this = '<%= @path %>/bin/activate_this.py'
-#site.addsitedir('<%= @path %>')
-#site.addsitedir('<%= @path %>/lib/python2.7/site-packages')
-os.environ['SENTRY_CONF'] = '<%= @path %>/sentry.conf'
+execfile(activate_this, dict(__file__=activate_this))
+os.environ['SENTRY_CONF'] = '<%= @path %>'
 
 from sentry.utils.runner import configure
 configure()

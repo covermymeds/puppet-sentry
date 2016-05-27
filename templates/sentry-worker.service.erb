@@ -10,7 +10,7 @@ PIDFile=<%= @path %>/sentry-worker.pid
 Environment=VIRTUAL_ENV="<%= @path %>"
 Environment=PATH="$VIRTUAL_ENV/bin:$PATH"
 WorkingDirectory=<%= @path %>
-ExecStart=<%= @path %>/bin/sentry --config=<%= @path %>/sentry.conf.py celery worker -B -f /var/log/sentry/sentry-worker.log --pidfile=/<%= @path %>/sentry-worker.pid
+ExecStart=<%= @path %>/bin/sentry --config=<%= @path %> celery worker -B -f /var/log/sentry/sentry-worker.log --pidfile=/<%= @path %>/sentry-worker.pid
 ExecStop=/bin/kill -KILL $MAINPID
 ExecReload=/bin/kill -HUP $MAINPID
 

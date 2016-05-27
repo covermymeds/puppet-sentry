@@ -7,6 +7,12 @@
 # Changing this value will result in all current sessions being invalidated
 system.secret-key: '<%= @secret_key %>'
 system.admin-email: '<%= @admin_email %>'
+redis.clusters:
+  default:
+    hosts:
+      0:
+        host: '<%= @redis_host %>'
+        port: <%= @redis_port %>
 mail.from: 'sentry@<%= @fqdn %>'
 mail.host: '<%= @smtp_host %>'
 mail.port: 25
