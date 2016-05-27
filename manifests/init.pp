@@ -10,6 +10,10 @@
 #
 # beacon: whether to share some data upstream with GetSentry's beacon (False)
 #
+# custom_config: array of custom configs to put into config.yml (undef)
+#
+# custom_settings: arrray of custom settings to put into sentry.conf.py (undef)
+#
 # db_host: the PostgreSQL database host (localhost)
 #
 # db_name: the name of the PostgreSQL database to use (sentry)
@@ -20,17 +24,13 @@
 #
 # db_user: the user account with which to connect to the database (sentry)
 #
+# extensions: hash of sentry extensions and source URL to install (sentry-github)
+#
 # group: UNIX group to own virtualenv, and run background workers (sentry)
 #
 # ldap_auth_version: version of the sentry_ldap_auth Python module to install (present)
 #
 # ldap_*: LDAP connection details used for creating local user accounts from AD users
-#
-# max_epm:
-#
-# max_http_body:
-#
-# max_stacktrace:
 #
 # memcached_host: name or IP of memcached server (localhost)
 #
@@ -39,8 +39,6 @@
 # organization: default organization to create, and in which to create new users
 #
 # path: path into which to install Sentry, and create the virtualenv (/srv/sentry)
-#
-# percent_limit:
 #
 # redis_host: name or IP of Redis server (localhost)
 #
@@ -54,6 +52,8 @@
 #
 # team: name of the default team to create and use for new projects
 #
+# url: source URL from which to install Sentry.  (undef, use PyPI)
+#
 # user: UNIX user to own virtualenv, and run background workers (sentry)
 #
 # version: the Sentry version to install
@@ -62,7 +62,6 @@
 #
 # wsgi_*: mod_wsgi controls
 #
-# extensions: array of sentry extensions to install (sentry-github)
 #
 # === Authors
 # Dan Sajner <dsajner@covermymeds.com>
@@ -77,12 +76,14 @@
 class sentry (
   $admin_email       = $sentry::params::admin_email,
   $admin_password    = $sentry::params::admin_password,
-  $beacon            = $sentry::params::beacon,
+  $custom_config     = $sentry::params::custom_conifg,
+  $custom_settings   = $sentry::params::custom_settings,
   $db_host           = $sentry::params::db_host,
   $db_name           = $sentry::params::db_name,
   $db_password       = $sentry::params::db_password,
   $db_port           = $sentry::params::db_port,
   $db_user           = $sentry::params::db_user,
+  $extensions        = $sentry::params::extensions,
   $group             = $sentry::params::group,
   $ldap_auth_version = $sentry::params::ldap_auth_version,
   $ldap_base_ou      = $sentry::params::ldap_base_ou,
@@ -92,14 +93,10 @@ class sentry (
   $ldap_host         = $sentry::params::ldap_host,
   $ldap_user         = $sentry::params::ldap_user,
   $ldap_password     = $sentry::params::ldap_password,
-  $max_epm           = $sentry::params::max_epm,
-  $max_http_body     = $sentry::params::max_http_body,
-  $max_stacktrace    = $sentry::params::max_stacktrace,
   $memcached_host    = $sentry::params::memcached_host,
   $memcached_port    = $sentry::params::memcached_port,
   $organization      = $sentry::params::organization,
   $path              = $sentry::params::path,
-  $percent_limit     = $sentry::params::percent_limit,
   $project           = $sentry::params::project,
   $redis_host        = $sentry::params::redis_host,
   $redis_port        = $sentry::params::redis_port,
@@ -110,18 +107,19 @@ class sentry (
   $ssl_cert          = $sentry::params::ssl_cert,
   $ssl_key           = $sentry::params::ssl_key,
   $team              = $sentry::params::team,
+  $url               = $sentry::params::url,
   $user              = $sentry::params::user,
   $version           = $sentry::params::version,
   $vhost             = $sentry::params::vhost,
   $wsgi_processes    = $sentry::params::wsgi_processes,
   $wsgi_threads      = $sentry::params::wsgi_threads,
-  $extensions        = $sentry::params::extensions,
 ) inherits ::sentry::params {
 
   # Install Sentry
   class { 'sentry::install':
     admin_email       => $admin_email,
     admin_password    => $admin_password,
+    extensions        => $extensions,
     group             => $group,
     organization      => $organization,
     path              => $path,
@@ -130,12 +128,17 @@ class sentry (
     team              => $team,
     user              => $user,
     version           => $version,
-    extensions        => $extensions,
   }
 
-  file { "${path}/sentry.conf":
+  file { "${path}/sentry.conf.py":
     ensure  => present,
-    content => template('sentry/sentry.conf.erb'),
+    content => template('sentry/sentry.conf.py.erb'),
+    notify  => Class['sentry::service'],
+  }
+
+  file { "${path}/config.yml":
+    ensure  => present,
+    content => template('sentry/config.yml.erb'),
     notify  => Class['sentry::service'],
   }
 
@@ -157,7 +160,7 @@ class sentry (
     user      => $user,
     group     => $group,
     path      => $path,
-    subscribe => File["${path}/sentry.conf"],
+    subscribe => File["${path}/sentry.conf.py"],
   }
 
   # Write out a list of "team/project dsn" values to a file.
@@ -167,7 +170,7 @@ class sentry (
     ensure  => present,
     mode    => '0755',
     content => template('sentry/dsn_mapper.py.erb'),
-    require => File["${path}/sentry.conf"],
+    require => File["${path}/sentry.conf.py"],
   }
 
   # this creates the DSN file for each project, daily.
@@ -180,7 +183,7 @@ class sentry (
 
   # run the Sentry cleanup process daily
   cron { 'sentry cleanup':
-    command => "${path}/bin/sentry --config=${path}/sentry.conf cleanup --days=30",
+    command => "${path}/bin/sentry --config=${path}/sentry.conf.py cleanup --days=30",
     user    => $user,
     minute  => 15,
     hour    => 1,
@@ -190,7 +193,7 @@ class sentry (
     ensure  => present,
     mode    => '0755',
     content => template('sentry/create_project.py.erb'),
-    require => File["${path}/sentry.conf"],
+    require => File["${path}/sentry.conf.py"],
   }
 
   # Collect the projects from exported resources

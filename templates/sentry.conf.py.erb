@@ -9,41 +9,22 @@ CONF_ROOT = os.path.dirname(__file__)
 
 DATABASES = {
     'default': {
-        # You can swap out the engine for MySQL easily by changing this value
-        # to ``django.db.backends.mysql`` or to PostgreSQL with
-        # ``django.db.backends.postgresql_psycopg2``
-
-        # If you change this, you'll also need to install the appropriate python
-        # package: psycopg2 (Postgres) or mysql-python
-        #'ENGINE': 'django.db.backends.sqlite3',
-        #'NAME': os.path.join(CONF_ROOT, 'sentry.db'),
-	
-	# Postgresql settings
-	'ENGINE': 'django.db.backends.postgresql_psycopg2',
-
-	'NAME': '<%= @db_name %>',
-	'USER': '<%= @db_user %>',
-	'PASSWORD': '<%= @db_password %>',
-	'HOST': '<%= @db_host %>',
-	'PORT': '<%= @db_port %>',
-
-        # If you're using Postgres, we recommend turning on autocommit
-        'OPTIONS': {
-           'autocommit': True,
-        }
+      'ENGINE': 'sentry.db.postgres',
+	    'NAME': '<%= @db_name %>',
+	    'USER': '<%= @db_user %>',
+	    'PASSWORD': '<%= @db_password %>',
+	    'HOST': '<%= @db_host %>',
+	    'PORT': '<%= @db_port %>',
     }
 }
+
+# You should not change this setting after your database has been created
+# unless you have altered all schemas first
+SENTRY_USE_BIG_INTS = True
 
 #############
 ## General ##
 #############
-
-# The administrative email for this installation.
-# Note: This will be reported back to getsentry.com as the point of contact. See
-# the beacon documentation for more information.
-
-SENTRY_ADMIN_EMAIL = '<%= @admin_email %>'
-SENTRY_BEACON = <%= @beacon.to_s.capitalize! %>
 
 SENTRY_MAX_STACKTRACE_FRAMES = <%= @max_stacktrace %>
 SENTRY_MAX_HTTP_BODY_SIZE = <%= @max_http_body %>
@@ -51,21 +32,6 @@ SENTRY_MAX_HTTP_BODY_SIZE = <%= @max_http_body %>
 # If you're expecting any kind of real traffic on Sentry, we highly recommend
 # configuring the CACHES and Redis settings
 
-###########
-## CACHE ##
-###########
-
-# You'll need to install the required dependencies for Memcached:
-#   pip install python-memcached
-
-SENTRY_CACHE = 'sentry.cache.django.DjangoCache'
-CACHES = {
-    'default': {
-        'BACKEND': 'django.core.cache.backends.memcached.MemcachedCache',
-	'LOCATION': ['<%= @memcached_host %>:<%= @memcached_port %>'],
-    }
-}
-    
 ##########
 ## Redis #
 ##########
@@ -78,10 +44,41 @@ SENTRY_REDIS_OPTIONS = {
         0: {
             'host': '<%= @redis_host %>',
             'port': <%= @redis_port %>,
-            'db': 0,
         }
     }
 }
+
+###########
+## CACHE ##
+###########
+
+# Sentry currently utilizes two separate mechanisms. While CACHES is not a
+# requirement, it will optimize several high throughput patterns.
+
+# If you wish to use memcached, install the dependencies and adjust the config
+# as shown:
+#
+#
+#   pip install python-memcached
+#
+# CACHES = {
+#     'default': {
+#         'BACKEND': 'django.core.cache.backends.memcached.MemcachedCache',
+#         'LOCATION': ['127.0.0.1:11211'],
+#     }
+# }
+
+# A primary cache is required for things such as processing events
+SENTRY_CACHE = 'sentry.cache.redis.RedisCache'
+
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.memcached.MemcachedCache',
+	      'LOCATION': ['<%= @memcached_host %>:<%= @memcached_port %>'],
+    }
+}
+
+
 ###########
 ## Queue ##
 ###########
@@ -90,26 +87,13 @@ SENTRY_REDIS_OPTIONS = {
 # information on configuring your queue broker and workers. Sentry relies
 # on a Python framework called Celery to manage queues.
 
-# You can enable queueing of jobs by turning off the always eager setting:
-CELERY_ALWAYS_EAGER = False
-# use Redis DB #1
-BROKER_URL = 'redis://<%= @redis_host%>:<%= @redis_port %>/1'
+BROKER_URL = 'redis://<%= @redis_host%>:<%= @redis_port %>'
 
 ##################
 ### Rate Limits ##
 ##################
 
 SENTRY_RATELIMITER = 'sentry.ratelimits.redis.RedisRateLimiter'
-# use Redis DB #2
-SENTRY_RATELIMITER_OPTIONS = {
-    'hosts': {
-        0: {
-            'host': '<%= @redis_host %>',
-            'port': <%= @redis_port %>,
-            'db': 2,
-        }
-    }
-}
 
 #####################
 ### Update Buffers ##
@@ -121,16 +105,6 @@ SENTRY_RATELIMITER_OPTIONS = {
 ## (read: if you send any kind of real data to Sentry, you should enable buffers)
 
 SENTRY_BUFFER = 'sentry.buffer.redis.RedisBuffer'
-# use Redis DB #3
-SENTRY_BUFFER_OPTIONS = {
-    'hosts': {
-        0: {
-            'host': '<%= @redis_host %>',
-            'port': <%= @redis_port %>,
-            'db': 3
-        }
-    }
-}
 
 #############
 ### Quotas ##
@@ -140,16 +114,6 @@ SENTRY_BUFFER_OPTIONS = {
 ## a whole.
 
 SENTRY_QUOTAS = 'sentry.quotas.redis.RedisQuota'
-# use Redis DB #4
-SENTRY_QUOTA_OPTIONS = {
-    'hosts': {
-        0: {
-            'host': '<%= @redis_host %>',
-            'port': <%= @redis_port %>,
-            'db': 4,
-        }
-    }
-}
 
 SENTRY_DEFAULT_MAX_EVENTS_PER_MINUTE = '<%= @percent_limit %>'
 SENTRY_SYSTEM_MAX_EVENTS_PER_MINUTE = <%= @max_epm %>
@@ -162,23 +126,30 @@ SENTRY_SYSTEM_MAX_EVENTS_PER_MINUTE = <%= @max_epm %>
 ## alerts possible.
 
 SENTRY_TSDB = 'sentry.tsdb.redis.RedisTSDB'
-# use Redis DB #5
-SENTRY_TSDB_OPTIONS = {
-    'hosts': {
-        0: {
-            'host': '<%= @redis_host %>',
-            'port': <%= @redis_port %>,
-            'db': 5,
-        }
-    }
+
+###########
+# Digests #
+###########
+
+# The digest backend powers notification summaries.
+
+SENTRY_DIGESTS = 'sentry.digests.backends.redis.RedisBackend'
+
+################
+# File storage #
+################
+
+# Any Django storage backend is compatible with Sentry. For more solutions see
+# the django-storages package: https://django-storages.readthedocs.org/en/latest/
+
+SENTRY_FILESTORE = 'django.core.files.storage.FileSystemStorage'
+SENTRY_FILESTORE_OPTIONS = {
+    'location': '/tmp/sentry-files',
 }
 
 ################
 ## Web Server ##
 ################
-
-# You MUST configure the absolute URI root for Sentry:
-SENTRY_URL_PREFIX = 'https://<%= @vhost %>'  # No trailing slash!
 
 # If you're using a reverse proxy, you should enable the X-Forwarded-Proto
 # and X-Forwarded-Host headers, and uncomment the following settings
@@ -193,24 +164,6 @@ SENTRY_URL_PREFIX = 'https://<%= @vhost %>'  # No trailing slash!
 #    'secure_scheme_headers': {'X-FORWARDED-PROTO': 'https'},
 #}
 
-#################
-## Mail Server ##
-#################
-
-# For more information check Django's documentation:
-#  https://docs.djangoproject.com/en/1.3/topics/email/?from=olddocs#e-mail-backends
-
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-
-EMAIL_HOST = '<%= @smtp_host %>'
-EMAIL_HOST_PASSWORD = ''
-EMAIL_HOST_USER = ''
-EMAIL_PORT = 25
-EMAIL_USE_TLS = False
-
-# The email address to send on behalf of
-SERVER_EMAIL = 'sentry@<%= @fqdn %>'
- 
 <% if @ldap_host -%>
 #########################
 ## LDAP Authentication ##
@@ -240,12 +193,8 @@ AUTH_LDAP_DEFAULT_SENTRY_ORGANIZATION = '<%= @organization %>'
 AUTH_LDAP_SENTRY_ORGANIZATION_MEMBER_TYPE = '<%= @ldap_member_type %>'
 AUTH_LDAP_SENTRY_ORGANIZATION_GLOBAL_ACCESS = True
 <% end -%>
-
-###########
-## etc. ##
-###########
-
-# If this file ever becomes compromised, it's important to regenerate your SECRET_KEY
-# Changing this value will result in all current sessions being invalidated
-SECRET_KEY = '<%= @secret_key %>'
-
+<% if @custom_settings -%>
+<% @custom_settings.each do |conf| -%>
+<%= conf %>
+<% end -%>
+<% end -%>
