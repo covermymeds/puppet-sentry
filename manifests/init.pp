@@ -183,7 +183,7 @@ class sentry (
 
   # run the Sentry cleanup process daily
   cron { 'sentry cleanup':
-    command => "${path}/bin/sentry --config=${path}/sentry.conf.py cleanup --days=30",
+    command => "${path}/bin/sentry --config=${path} cleanup --days=30",
     user    => $user,
     minute  => 15,
     hour    => 1,

@@ -138,7 +138,7 @@ class sentry::install (
   # an existing database.  The `creates` parameter is version-specific,
   # so this should run automatically on version upgrades.
   exec { 'sentry-database-install':
-    command => "${path}/bin/sentry --config=${path}/sentry.conf.py upgrade --noinput > ${path}/install-${version}.log 2>&1",
+    command => "${path}/bin/sentry --config=${path} upgrade --noinput > ${path}/install-${version}.log 2>&1",
     creates => "${path}/install-${version}.log",
     path    => "${path}/bin:/bin:/usr/bin",
     user    => $user,
@@ -152,7 +152,7 @@ class sentry::install (
   # Note: A failure here is catastrophic, and will prevent additional
   # Sentry configuration.
   exec { 'sentry-create-admin':
-    command => "${path}/bin/sentry --config=${path}/sentry.conf.py createuser --superuser --email=${admin_email} --password=${admin_password} --no-input > ${path}/admin-${admin_email}.log 2>&1",
+    command => "${path}/bin/sentry --config=${path} createuser --superuser --email=${admin_email} --password=${admin_password} --no-input > ${path}/admin-${admin_email}.log 2>&1",
     creates => "${path}/admin-${admin_email}.log",
     path    => "${path}/bin:/usr/bin:/usr/sbin:/bin",
     require => Exec['sentry-database-install'],
