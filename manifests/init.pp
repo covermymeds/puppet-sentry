@@ -52,7 +52,7 @@
 #
 # team: name of the default team to create and use for new projects
 #
-# url: source URL from which to install Sentry.  (undef, use PyPI)
+# url: source URL from which to install Sentry.  (false, use PyPI)
 #
 # user: UNIX user to own virtualenv, and run background workers (sentry)
 #

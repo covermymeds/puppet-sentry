@@ -34,7 +34,7 @@ class sentry::params {
   $ssl_cert          = '/etc/pki/tls/certs/localhost.crt'
   $ssl_key           = '/etc/pki/tls/private/localhost.key'
   $team              = 'Default'
-  $url               = undef
+  $url               = false
   $user              = 'sentry'
   $version           = 'latest'
   $vhost             = $::fqdn
