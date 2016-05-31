@@ -7,8 +7,9 @@ puppet-sentry
 This module supports only Red Hat Enterprise Linux 7 and its derivatives.
 
 The following modules are required:
-* [Apache](https://forge.puppetlabs.com/puppetlabs/apache)
-* [Python](https://forge.puppetlabs.com/stankevich/python)
+* [apache](https://forge.puppetlabs.com/puppetlabs/apache)
+* [logrotate](https://forge.puppet.com/yo61/logrotate)
+* [python](https://forge.puppetlabs.com/stankevich/python)
 * [stdlib](https://forge.puppetlabs.com/puppetlabs/stdlib)
 
 This module configures Sentry to use a PostgreSQL database, memcached, and Redis. The installation and configuration of these services are not managed by this module.  Please see the [Modules we use](#modules-we-use) to satify those dependencies below.
@@ -57,6 +58,7 @@ sentry::db_name: 'sentry'
 sentry::db_user: 'sentry'
 sentry::db_password: 'sentry_db_password'
 sentry::sentry_vhost: 'sentry.example.com'
+sentry::ldap_auth_version: '2.0'
 sentry::ldap_host: 'ldap.example.com'
 sentry::ldap_user: 'sentry_ldap@example.com'
 sentry::ldap_password: 'ldap_bind_password'
@@ -72,10 +74,10 @@ sentry::organization: 'Your Organization Name'
 sentry::team: 'Default Team Name'
 sentry::secret_key: <some secret key>
 sentry::path: '/var/lib/sentry'
-sentry::version: '7.7.1'
+sentry::version: '8.0.0'
 sentry::extensions:
-  - sentry-github
-  - sentry-hipchat
+  sentry-github: https://github.com/getsentry/sentry-github/archive/master.zip
+  sentry-hipchat: https://github.com/getsentry/sentry-hipchat-ac/archive/master.zip
 ```
 
 ## Classes
@@ -85,7 +87,8 @@ This is the main class that handles the installation of Sentry from [PyPI](https
 Class parameters:
 * **admin_email**: the admin user's email address; also used as login name (root@localhost)
 * **admin_password**: the admin user's password (admin)
-* **beacon**: whether to share some data upstream with GetSentry's beacon (False)
+* **custom_config**: array of custom configs to put into `config.yml`
+* **custom_settings**: array of custom settings to put into `sentry.conf.py`
 * **db_host**: the PostgreSQL database host (localhost)
 * **db_name**: the name of the PostgreSQL database to use (sentry)
 * **db_password**: the DB user's password (sentry)
@@ -93,25 +96,22 @@ Class parameters:
 * **db_user**: the user account with which to connect to the database (sentry)
 * **group**: UNIX group to own virtualenv, and run background workers (sentry)
 * **ldap_* **: LDAP connection details used for creating local user accounts from AD users
-* **max_epm**:
-* **max_http_body**:
-* **max_stacktrace**:
 * **memcached_host**: name or IP of memcached server (localhost)
 * **memcached_port**: port to use for memcached (11211)
 * **organization**: default organization to create, and in which to create new users
 * **path**: path into which to install Sentry, and create the virtualenv (/srv/sentry)
-* **percent_limit**:
 * **redis_host**: name or IP of Redis server (localhost)
 * **redis_port**: port to use for Redis (6379)
 * **secret_key**: string used to hash cookies (fqdn_rand_string(40))
 * **smtp_host**: name or IP of SMTP server (localhost)
 * **ssl_* **: Apache SSL controls
 * **team**: name of the default team to create and use for new projects
+* **url**: source URL form which to install Sentry (false, use PyPI)
 * **user**: UNIX user to own virtualenv, and run background workers (sentry)
 * **version**: the Sentry version to install
 * **vhost**: the URL at which users will access the Sentry GUI
 * **wsgi_* **: mod_wsgi controls
-* **extensions**: array of sentry extensions to install
+* **extensions**: hash of Sentry extensions, with source URLs, to install
 
 ### sentry::install
 This class installs Sentry and its various dependencies. It will create the system user and group, install a Python virtualenv, several RPMs, and several `pip` packages. The [getsentry-ldap-auth](https://github.com/banno/getsentry-ldap-auth) plugin is installed, but will not be used unless an LDAP host is defined in `sentry::init`.
@@ -126,6 +126,7 @@ Class parameters:
 * **path**: path into which to create virtualenv and install Sentry
 * **project**: initial Sentry project to create
 * **team**: default Sentry team to create
+* **url**: an optional URL from which to install Sentry
 * **user**: UNIX user to own Sentry files
 * **version**: version of Sentry to install
 * **extensions**: array of sentry extensions to install
