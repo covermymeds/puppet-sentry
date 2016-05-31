@@ -8,8 +8,6 @@
 #
 # admin_password: the admin user's password (admin)
 #
-# beacon: whether to share some data upstream with GetSentry's beacon (False)
-#
 # custom_config: array of custom configs to put into config.yml (undef)
 #
 # custom_settings: arrray of custom settings to put into sentry.conf.py (undef)
