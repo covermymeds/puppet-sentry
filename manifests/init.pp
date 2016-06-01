@@ -113,8 +113,46 @@ class sentry (
   $wsgi_threads      = $sentry::params::wsgi_threads,
 ) inherits ::sentry::params {
 
+  class { '::sentry::setup':
+    group => $group,
+    path  => $path,
+    user  => $user,
+  }
+  contain '::sentry::setup'
+
+  class { '::sentry::config':
+    admin_email     => $admin_email,
+    admin_password  => $admin_password,
+    custom_config   => $custom_config,
+    custom_settings => $custom_settings,
+    db_host         => $db_host,
+    db_name         => $db_name,
+    db_password     => $db_password,
+    db_port         => $db_port,
+    db_user         => $db_user,
+    group           => $group,
+    ldap_base_ou    => $ldap_base_ou,
+    ldap_domain     => $ldap_domain,
+    ldap_group_base => $ldap_group_base,
+    ldap_group_dn   => $ldap_group_dn,
+    ldap_host       => $ldap_host,
+    ldap_user       => $ldap_user,
+    ldap_password   => $ldap_password,
+    memcached_host  => $memcached_host,
+    memcached_port  => $memcached_port,
+    organization    => $organization,
+    path            => $path,
+    redis_host      => $redis_host,
+    redis_port      => $redis_port,
+    secret_key      => $secret_key,
+    smtp_host       => $smtp_host,
+    user            => $user,
+    require         => Class['::sentry::setup'],
+  }
+  contain '::sentry::config'
+
   # Install Sentry
-  class { 'sentry::install':
+  class { '::sentry::install':
     admin_email       => $admin_email,
     admin_password    => $admin_password,
     extensions        => $extensions,
@@ -126,22 +164,12 @@ class sentry (
     team              => $team,
     user              => $user,
     version           => $version,
+    subscribe         => Class['::sentry::config'],
   }
-
-  file { "${path}/sentry.conf.py":
-    ensure  => present,
-    content => template('sentry/sentry.conf.py.erb'),
-    notify  => Class['sentry::service'],
-  }
-
-  file { "${path}/config.yml":
-    ensure  => present,
-    content => template('sentry/config.yml.erb'),
-    notify  => Class['sentry::service'],
-  }
+  contain '::sentry::install'
 
   # set up WSGI
-  class { 'sentry::wsgi':
+  class { '::sentry::wsgi':
     path           => $path,
     ssl_ca         => $ssl_ca,
     ssl_chain      => $ssl_chain,
@@ -150,16 +178,18 @@ class sentry (
     vhost          => $vhost,
     wsgi_processes => $wsgi_processes,
     wsgi_threads   => $wsgi_threads,
-    subscribe      => Class['sentry::install'],
+    subscribe      => Class['::sentry::install'],
   }
+  contain '::sentry::wsgi'
 
   # set up the Sentry background worker(s)
-  class { 'sentry::service':
+  class { '::sentry::service':
     user      => $user,
     group     => $group,
     path      => $path,
-    subscribe => File["${path}/sentry.conf.py"],
+    subscribe => Class['::sentry::config'],
   }
+  contain '::sentry::service'
 
   # Write out a list of "team/project dsn" values to a file.
   # Apache will serve this list and Puppet will consume to set
@@ -168,7 +198,7 @@ class sentry (
     ensure  => present,
     mode    => '0755',
     content => template('sentry/dsn_mapper.py.erb'),
-    require => File["${path}/sentry.conf.py"],
+    require => Class['::sentry::install'],
   }
 
   # this creates the DSN file for each project, daily.
@@ -177,6 +207,7 @@ class sentry (
     user    => root,
     minute  => 5,
     hour    => 2,
+    require => Class['::sentry::install'],
   }
 
   # run the Sentry cleanup process daily
@@ -185,16 +216,17 @@ class sentry (
     user    => $user,
     minute  => 15,
     hour    => 1,
+    require => Class['::sentry::install'],
   }
 
   file { "${path}/create_project.py":
     ensure  => present,
     mode    => '0755',
     content => template('sentry/create_project.py.erb'),
-    require => File["${path}/sentry.conf.py"],
+    require => Class['::sentry::install'],
   }
 
   # Collect the projects from exported resources
-  include sentry::server::collect
+  include ::sentry::server::collect
 
 }

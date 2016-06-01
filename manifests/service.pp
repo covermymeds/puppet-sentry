@@ -39,7 +39,6 @@ class sentry::service (
     notify  => Exec['enable-sentry-services'],
   }
 
-
   service { 'sentry-worker':
     ensure     => running,
     enable     => true,
@@ -47,6 +46,28 @@ class sentry::service (
     require    => [ File['/etc/systemd/system/sentry-worker.service'],
                     User[$user],
                   ],
+  }
+
+  # if the Sentry config changes, do a full restart of the Sentry Celery workers
+  exec { 'restart-sentry-worker':
+    command     => '/usr/bin/systemctl stop sentry-worker; /usr/bin/systemctl start sentry-worker',
+    path        => '/bin:/usr/bin',
+    refreshonly => true,
+    subscribe   => Class['::sentry::config'],
+  }
+
+  # Setup log rotation for the sentry-worker process
+  logrotate::rule { 'sentry-worker':
+    ensure       => present,
+    path         => '/var/log/sentry/sentry-worker.log',
+    create       => true,
+    compress     => true,
+    missingok    => true,
+    rotate       => 14,
+    ifempty      => false,
+    create_mode  => '0644',
+    create_owner => $user,
+    create_group => $group,
   }
 
 }
