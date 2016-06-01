@@ -4,11 +4,10 @@
 from __future__ import absolute_import
 import os, os.path, sys
 
-os.environ['SENTRY_CONF'] = '<%= @path %>/sentry.conf'
-
 # Add the project to the python path
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), os.pardir))
-sys.stdout = sys.stderr
+activate_this = '<%= @path %>/bin/activate_this.py'
+execfile(activate_this, dict(__file__=activate_this))
+os.environ['SENTRY_CONF'] = '<%= @path %>'
 
 # Configure the application (Logan)
 from sentry.utils.runner import configure

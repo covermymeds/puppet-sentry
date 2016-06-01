@@ -1,8 +1,10 @@
 import os, sys, site
 from urllib import quote
 
-site.addsitedir('<%= @path %>')
-os.environ['SENTRY_CONF'] = '<%= @path %>/sentry.conf'
+# Add the project to the python path
+activate_this = '<%= @path %>/bin/activate_this.py'
+execfile(activate_this, dict(__file__=activate_this))
+os.environ['SENTRY_CONF'] = '<%= @path %>'
 
 # Check to see if the project exists on the team
 from sentry.utils.runner import configure

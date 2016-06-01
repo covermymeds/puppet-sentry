@@ -13,7 +13,8 @@
   ],
   "dependencies": [
     { "name": "puppetlabs/apache", "version_requirement": ">= 1.5.0" },
+    { "name": "puppetlabs/stdlib", "version_requirement": ">= 4.6.0" },
     { "name": "stankevich/python", "version_requirement": ">= 1.9.8" },
-    { "name": "puppetlabs/stdlib", "version_requirement": ">= 4.6.0" }
+    { "name": "yo61/logrotate", "version_requirement:" ">= 1.3.0" }
   ]
 }
