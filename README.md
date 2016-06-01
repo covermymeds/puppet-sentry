@@ -6,6 +6,8 @@ puppet-sentry
 ## Dependencies
 This module supports only Red Hat Enterprise Linux 7 and its derivatives.
 
+Puppet 4 or future parser are **required**.
+
 The following modules are required:
 * [apache](https://forge.puppetlabs.com/puppetlabs/apache)
 * [logrotate](https://forge.puppet.com/yo61/logrotate)
