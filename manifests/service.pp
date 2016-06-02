@@ -1,7 +1,7 @@
 # == Class: sentry::service
 #
 # This class is meant to be called from sentry.
-# It ensures the service is running via systemd
+# It ensures the background services are running via systemd
 #
 # === Parameters
 #
@@ -30,6 +30,7 @@ class sentry::service (
     path        => '/bin:/sbin',
   }
 
+  # Sentry Celery Worker
   file { '/etc/systemd/system/sentry-worker.service':
     ensure  => present,
     mode    => '0644',
@@ -56,10 +57,50 @@ class sentry::service (
     subscribe   => Class['::sentry::config'],
   }
 
-  # Setup log rotation for the sentry-worker process
+  # Sentry Celery Beat
+  file { '/etc/systemd/system/sentry-beat.service':
+    ensure  => present,
+    mode    => '0644',
+    owner   => 'root',
+    group   => 'root',
+    content => template('sentry/sentry-beat.service.erb'),
+    notify  => Exec['enable-sentry-services'],
+  }
+
+  service { 'sentry-beat':
+    ensure     => running,
+    enable     => true,
+    hasrestart => true,
+    require    => [ File['/etc/systemd/system/sentry-beat.service'],
+                    User[$user],
+                  ],
+  }
+
+  # if the Sentry config changes, do a full restart of the Sentry beat worker
+  exec { 'restart-sentry-beat':
+    command     => '/usr/bin/systemctl stop sentry-beat; /usr/bin/systemctl start sentry-beat',
+    path        => '/bin:/usr/bin',
+    refreshonly => true,
+    subscribe   => Class['::sentry::config'],
+  }
+
+  # Setup log rotation
   logrotate::rule { 'sentry-worker':
     ensure       => present,
     path         => '/var/log/sentry/sentry-worker.log',
+    create       => true,
+    compress     => true,
+    missingok    => true,
+    rotate       => 14,
+    ifempty      => false,
+    create_mode  => '0644',
+    create_owner => $user,
+    create_group => $group,
+  }
+
+  logrotate::rule { 'sentry-beat':
+    ensure       => present,
+    path         => '/var/log/sentry/sentry-beat.log',
     create       => true,
     compress     => true,
     missingok    => true,

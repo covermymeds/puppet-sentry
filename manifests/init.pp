@@ -48,8 +48,6 @@
 #
 # ssl_*: Apache SSL controls
 #
-# team: name of the default team to create and use for new projects
-#
 # url: source URL from which to install Sentry.  (false, use PyPI)
 #
 # user: UNIX user to own virtualenv, and run background workers (sentry)
@@ -104,7 +102,6 @@ class sentry (
   $ssl_chain         = $sentry::params::ssl_chain,
   $ssl_cert          = $sentry::params::ssl_cert,
   $ssl_key           = $sentry::params::ssl_key,
-  $team              = $sentry::params::team,
   $url               = $sentry::params::url,
   $user              = $sentry::params::user,
   $version           = $sentry::params::version,
@@ -161,7 +158,6 @@ class sentry (
     path              => $path,
     project           => $project,
     ldap_auth_version => $ldap_auth_version,
-    team              => $team,
     user              => $user,
     version           => $version,
     subscribe         => Class['::sentry::config'],
@@ -187,7 +183,7 @@ class sentry (
     user      => $user,
     group     => $group,
     path      => $path,
-    subscribe => Class['::sentry::config'],
+    subscribe => Class['::sentry::install'],
   }
   contain '::sentry::service'
 

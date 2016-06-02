@@ -12,7 +12,6 @@
 # organization: default Sentry organization to create
 # path: path into which to create virtualenv and install Sentry
 # project: initial Sentry project to create
-# team: default Sentry team to create
 # url: URL from which to install Sentry
 # user: UNIX user to own Sentry files
 # version: version of Sentry to install
@@ -35,7 +34,6 @@ class sentry::install (
   $organization      = $sentry::organization,
   $path              = $sentry::path,
   $project           = $sentry::project,
-  $team              = $sentry::team,
   $url               = $sentry::url,
   $user              = $sentry::user,
   $version           = $sentry::version,

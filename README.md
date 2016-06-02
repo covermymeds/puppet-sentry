@@ -23,7 +23,7 @@ To install the latest version of Sentry with all default values:
 ```
 class { 'sentry': }
 ```
-The default configuration assumes all of the dependencies are running on localhost, which is likely only useful for a development scenario.
+The default configuration assumes all of the dependencies are running on localhost, which is likely only useful for a development scenario.  This will also use the Red Hat default `snakeoil` SSL certificate for HTTPS.
 
 A more realistic use case following the roles and profiles pattern:
 * **role/manifests/sentry.pp**
@@ -55,36 +55,37 @@ class profile::sentry {
 ---
 classes:
   - role::sentry
+sentry::admin_email: 'admin@example.com'
+sentry::admin_password: <redacted>
 sentry::db_host: 'postgresql.example.com'
 sentry::db_name: 'sentry'
 sentry::db_user: 'sentry'
 sentry::db_password: 'sentry_db_password'
-sentry::sentry_vhost: 'sentry.example.com'
-sentry::ldap_auth_version: '2.0'
-sentry::ldap_host: 'ldap.example.com'
-sentry::ldap_user: 'sentry_ldap@example.com'
-sentry::ldap_password: 'ldap_bind_password'
-sentry::ldap_domain: 'example'
-sentry::ldap_base_ou: 'dc=example,dc=com'
-sentry::sentry_group_base: 'OU=Sentry Users,OU=Admin Users,DC=example,DC=com'
-sentry::sentry_group_dn: 'CN=Sentry Group,OU=Admin Groups,DC=example,DC=com'
-sentry::redis_host: 'redis.example.com'
-sentry::smtp_host: 'smtp.example.com'
-sentry::admin_email: 'admin@example.com'
-sentry::admin_password: <redacted>
-sentry::organization: 'Your Organization Name'
-sentry::team: 'Default Team Name'
-sentry::secret_key: <some secret key>
-sentry::path: '/var/lib/sentry'
-sentry::version: '8.0.0'
 sentry::extensions:
   sentry-github: https://github.com/getsentry/sentry-github/archive/master.zip
   sentry-hipchat: https://github.com/getsentry/sentry-hipchat-ac/archive/master.zip
+sentry::ldap_auth_version: '2.0'
+sentry::ldap_domain: 'example'
+sentry::ldap_base_ou: 'dc=example,dc=com'
+sentry::ldap_group_base: 'OU=Sentry Users,OU=Admin Users,DC=example,DC=com'
+sentry::ldap_group_dn: 'CN=Sentry Group,OU=Admin Groups,DC=example,DC=com'
+sentry::ldap_host: 'ldap.example.com'
+sentry::ldap_user: 'sentry_ldap@example.com'
+sentry::ldap_password: 'ldap_bind_password'
+sentry::organization: 'Awesome Organization'
+sentry::path: '/var/lib/sentry'
+sentry::redis_host: 'redis.example.com'
+sentry::secret_key: <some secret key>
+sentry::smtp_host: 'smtp.example.com'
+sentry::ssl_cert: '/etc/ssl/sentry.example.com.pem'
+sentry::ssl_key: '/etc/ssl/sentry.example.com.key'
+sentry::version: '8.4.1'
+sentry::sentry_vhost: 'sentry.example.com'
 ```
 
 ## Classes
 ### sentry
-This is the main class that handles the installation of Sentry from [PyPI](https://pypi.python.org/pypi), configures an Apache virtual host running `mod_wsgi`, and manages the Sentry background worker processes.
+This is the main class that handles the installation of Sentry, configures an Apache virtual host running `mod_wsgi`, and manages the Sentry background worker processes.
 
 Class parameters:
 * **admin_email**: the admin user's email address; also used as login name (root@localhost)
@@ -96,6 +97,7 @@ Class parameters:
 * **db_password**: the DB user's password (sentry)
 * **db_port**: the PostgreSQL database port (5432)
 * **db_user**: the user account with which to connect to the database (sentry)
+* **extensions**: hash of Sentry extensions, with source URLs, to install
 * **group**: UNIX group to own virtualenv, and run background workers (sentry)
 * **ldap_* **: LDAP connection details used for creating local user accounts from AD users
 * **memcached_host**: name or IP of memcached server (localhost)
@@ -106,55 +108,31 @@ Class parameters:
 * **redis_port**: port to use for Redis (6379)
 * **secret_key**: string used to hash cookies (fqdn_rand_string(40))
 * **smtp_host**: name or IP of SMTP server (localhost)
-* **ssl_* **: Apache SSL controls
-* **team**: name of the default team to create and use for new projects
-* **url**: source URL form which to install Sentry (false, use PyPI)
+* **ssl_* **: Apache SSL controls.  The `ssl_cert` and `ssl_key` parameters reference files on the Sentry server.  You are responsible for getting these files onto the server yourself.
+* **url**: source URL form which to install Sentry (false, use [PyPI](https://pypi.python.org/pypi/sentry/))
 * **user**: UNIX user to own virtualenv, and run background workers (sentry)
 * **version**: the Sentry version to install
 * **vhost**: the URL at which users will access the Sentry GUI
 * **wsgi_* **: mod_wsgi controls
-* **extensions**: hash of Sentry extensions, with source URLs, to install
+
+### sentry::setup
+This private class ensures that all of the Sentry prerequisites are installed.  It will create the direcotry into which Sentry will be installed, create the Sentry user and group, create a Python virtual environment, and install the RPM and `pip` dependencies.
+
+### sentry::config
+This private class installs the `sentry.conf.py` and `config.yml` configuration files used by Sentry.
 
 ### sentry::install
-This class installs Sentry and its various dependencies. It will create the system user and group, install a Python virtualenv, several RPMs, and several `pip` packages. The [getsentry-ldap-auth](https://github.com/banno/getsentry-ldap-auth) plugin is installed, but will not be used unless an LDAP host is defined in `sentry::init`.
+This private class installs Sentry itself. The [getsentry-ldap-auth](https://github.com/banno/getsentry-ldap-auth) plugin is installed, but will not be used unless an LDAP host is defined in `sentry::init`.
+
+Upon first installation, the initial database migrations will be performed, a Sentry admin user will be created, and a basic configuration will be bootstrapped.
 
 This class will also handle upgrades to Sentry, when the `version` parameter defined here is different from the version installed.  The upgrade process is as automated as possible, but manual intervention may be required depending on your specific configuration.
 
-Class parameters:
-* **admin_email**: Sentry admin user email address
-* **admin_password**: Sentry admin user password
-* **group**: UNIX group to own Sentry files
-* **organization**: default Sentry organization to create
-* **path**: path into which to create virtualenv and install Sentry
-* **project**: initial Sentry project to create
-* **team**: default Sentry team to create
-* **url**: an optional URL from which to install Sentry
-* **user**: UNIX user to own Sentry files
-* **version**: version of Sentry to install
-* **extensions**: array of sentry extensions to install
-
 ### sentry::service
-This class manages the Sentry background worker via `systemd`.
-
-Class parameters:
-* **user**: UNIX user to run Sentry services
-* **group**: UNIX group to run Sentry services
-* **path**: path to Sentry installation / virtualenv
+This private class manages the Sentry background workers via `systemd`.
 
 ### sentry::wsgi
-This class installs an Apache virtual host with `mod_wsgi`. HTTPS support is optional.
-
-Class parameters:
-* **path**: the virtualenv path for your Sentry installation
-* **publish_dsns**: whether or not to make each Sentry application's DSN accessible via http(s)
-* **ssl**: whether or not to enable SSL support
-* **ssl_ca**: the SSL CA file to use
-* **ssl_chain**: the SSL chain file to use
-* **ssl_cert**: the SSL public certificate to use
-* **ssl_key**: the SSL private key to use
-* **vhost**: the hostname at which Sentry will be accessible
-* **wsgi_processes**: the number of mod_wsgi processes to use
-* **wsgi_threads**: the number of mod_wsgi threads to use
+This private class installs an Apache virtual host with `mod_wsgi`. HTTPS support is optional.
 
 ## Defines
 ### sentry::server::collect
@@ -180,7 +158,7 @@ This defined type looks for a custom fact named `${name}_lang`.  If found, the v
 ### sentry::source::project
 This defined type defines a Sentry project.
 
-For each `sentry::source::project`, a Sentry project will be created in the default Organization and Team.  
+For each `sentry::source::project`, a Sentry project will be created in the default Organization and Team.
 
 Type parameters:
 * **organization**: The Sentry organization to use.  Required.  No default.
