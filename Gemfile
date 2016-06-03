@@ -1,4 +1,4 @@
-source "https://gems.covermymeds.com"
+source "https://rubygems.org"
 gem "rspec"
 gem "json_pure"
 gem "hiera", ">= 2.0", "< 4.0"

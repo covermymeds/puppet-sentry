@@ -3,6 +3,8 @@ puppet-sentry
 
 [Sentry](https://www.getsentry.com) is "a modern error logging and aggregation platform."  This module installs the [on-premise](https://docs.getsentry.com/on-premise/) open source version of Sentry. A Sentry administrative user, default Organization and default Team will be created.
 
+**NOTE** version 3 of this module only supports Sentry versions 8.4.0 and above.
+
 ## Dependencies
 This module supports only Red Hat Enterprise Linux 7 and its derivatives.
 
@@ -108,7 +110,7 @@ Class parameters:
 * **redis_port**: port to use for Redis (6379)
 * **secret_key**: string used to hash cookies (fqdn_rand_string(40))
 * **smtp_host**: name or IP of SMTP server (localhost)
-* **ssl_* **: Apache SSL controls.  The `ssl_cert` and `ssl_key` parameters reference files on the Sentry server.  You are responsible for getting these files onto the server yourself.
+* **ssl_* **: Apache SSL controls.  The `ssl_cert` and `ssl_key` parameters reference files on the Sentry server. Your Sentry profile class or other higher level class should manage the installation of these file resources.
 * **url**: source URL form which to install Sentry (false, use [PyPI](https://pypi.python.org/pypi/sentry/))
 * **user**: UNIX user to own virtualenv, and run background workers (sentry)
 * **version**: the Sentry version to install

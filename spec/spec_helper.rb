@@ -8,33 +8,3 @@ RSpec.configure do |c|
   c.manifest_dir = File.join(fixture_path, 'manifests')
   c.hiera_config = 'spec/fixtures/hiera/hiera.yaml'
 end
-
-shared_context 'RedHat 7' do
-  let(:facts) do
-    {
-      osfamily: 'RedHat',
-      operatingsystem: 'RedHat',
-      operatingsystemrelease: '7.2',
-      operatingsystemmajrelease: '7',
-      os: {
-        architecture: "x86_64",
-        family: "RedHat",
-        hardware: "x86_64",
-        name: "RedHat",
-        release: {
-          full: "7.2",
-          major: "7",
-          minor: "2"
-        },
-        selinux: {
-          config_mode: "permissive",
-          config_policy: "targeted",
-          current_mode: "permissive",
-          enabled: true,
-          enforced: false,
-          policy_version: "28"
-        }
-      }
-    }
-  end
-end

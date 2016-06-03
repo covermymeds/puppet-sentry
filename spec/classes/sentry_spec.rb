@@ -35,4 +35,11 @@ describe 'Sentry' do
     it { is_expected.to contain_class('sentry::service') }
     it { is_expected.to contain_class('sentry::wsgi') }
   end
+
+  context 'Sentry version < 8.4.0' do
+    let (:params) {{ :version => '8.0.0' }}
+    it "should fail" do
+      expect { catalogue }.to raise_error(Puppet::Error, /Sentry version 8.4.0 or greater is required./)
+    end
+  end
 end

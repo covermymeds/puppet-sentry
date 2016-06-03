@@ -110,6 +110,11 @@ class sentry (
   $wsgi_threads      = $sentry::params::wsgi_threads,
 ) inherits ::sentry::params {
 
+  if $version != 'latest' {
+    if versioncmp('8.4.0', $version) > 0 {
+      fail('Sentry version 8.4.0 or greater is required.')
+    }
+  }
   class { '::sentry::setup':
     group => $group,
     path  => $path,
