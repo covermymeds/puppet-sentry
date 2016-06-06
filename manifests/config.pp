@@ -18,7 +18,7 @@ class sentry::config (
   $ldap_password     = $sentry::ldap_password,
   $memcached_host    = $sentry::memcached_host,
   $memcached_port    = $sentry::memcached_port,
-  $organization      = $sentrt::organization,
+  $organization      = $sentry::organization,
   $path              = $sentry::path,
   $redis_host        = $sentry::redis_host,
   $redis_port        = $sentry::redis_port,
