@@ -115,82 +115,20 @@ class sentry (
       fail('Sentry version 8.4.0 or greater is required.')
     }
   }
-  class { '::sentry::setup':
-    group => $group,
-    path  => $path,
-    user  => $user,
-  }
+
+  # establish resource containment
   contain '::sentry::setup'
-
-  class { '::sentry::config':
-    admin_email     => $admin_email,
-    admin_password  => $admin_password,
-    custom_config   => $custom_config,
-    custom_settings => $custom_settings,
-    db_host         => $db_host,
-    db_name         => $db_name,
-    db_password     => $db_password,
-    db_port         => $db_port,
-    db_user         => $db_user,
-    group           => $group,
-    ldap_base_ou    => $ldap_base_ou,
-    ldap_domain     => $ldap_domain,
-    ldap_group_base => $ldap_group_base,
-    ldap_group_dn   => $ldap_group_dn,
-    ldap_host       => $ldap_host,
-    ldap_user       => $ldap_user,
-    ldap_password   => $ldap_password,
-    memcached_host  => $memcached_host,
-    memcached_port  => $memcached_port,
-    organization    => $organization,
-    path            => $path,
-    redis_host      => $redis_host,
-    redis_port      => $redis_port,
-    secret_key      => $secret_key,
-    smtp_host       => $smtp_host,
-    user            => $user,
-    require         => Class['::sentry::setup'],
-  }
   contain '::sentry::config'
-
-  # Install Sentry
-  class { '::sentry::install':
-    admin_email       => $admin_email,
-    admin_password    => $admin_password,
-    extensions        => $extensions,
-    group             => $group,
-    organization      => $organization,
-    path              => $path,
-    project           => $project,
-    ldap_auth_version => $ldap_auth_version,
-    user              => $user,
-    version           => $version,
-    subscribe         => Class['::sentry::config'],
-  }
   contain '::sentry::install'
-
-  # set up WSGI
-  class { '::sentry::wsgi':
-    path           => $path,
-    ssl_ca         => $ssl_ca,
-    ssl_chain      => $ssl_chain,
-    ssl_cert       => $ssl_cert,
-    ssl_key        => $ssl_key,
-    vhost          => $vhost,
-    wsgi_processes => $wsgi_processes,
-    wsgi_threads   => $wsgi_threads,
-    subscribe      => Class['::sentry::install'],
-  }
+  contain '::sentry::service'
   contain '::sentry::wsgi'
 
-  # set up the Sentry background worker(s)
-  class { '::sentry::service':
-    user      => $user,
-    group     => $group,
-    path      => $path,
-    subscribe => Class['::sentry::install'],
-  }
-  contain '::sentry::service'
+  # establish resource precedence and notifications
+  Class['::sentry::setup'] ~>
+  Class['::sentry::config'] ~>
+  Class['::sentry::install'] ~>
+  Class['::sentry::service'] ~>
+  Class['::sentry::wsgi']
 
   # Write out a list of "team/project dsn" values to a file.
   # Apache will serve this list and Puppet will consume to set
