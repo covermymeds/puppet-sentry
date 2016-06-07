@@ -12,7 +12,6 @@
 # organization: default Sentry organization to create
 # path: path into which to create virtualenv and install Sentry
 # project: initial Sentry project to create
-# team: default Sentry team to create
 # url: URL from which to install Sentry
 # user: UNIX user to own Sentry files
 # version: version of Sentry to install
@@ -35,80 +34,16 @@ class sentry::install (
   $organization      = $sentry::organization,
   $path              = $sentry::path,
   $project           = $sentry::project,
-  $team              = $sentry::team,
   $url               = $sentry::url,
   $user              = $sentry::user,
   $version           = $sentry::version,
 ) {
-
-  group { $group:
-    ensure => present,
-  }
-
-  user { $user:
-    ensure  => present,
-    gid     => $group,
-    home    => '/dev/null',
-    shell   => '/bin/false',
-    require => Group[$group],
-  }
-
-  file { '/var/log/sentry':
-    ensure  => directory,
-    owner   => 'sentry',
-    group   => 'sentry',
-    mode    => '0755',
-    require => User[$user],
-  }
-
-  # Setup log rotation for the sentry-worker process
-  logrotate::rule { 'sentry-worker':
-    ensure       => present,
-    path         => '/var/log/sentry/sentry-worker.log',
-    create       => true,
-    compress     => true,
-    missingok    => true,
-    rotate       => 14,
-    ifempty      => false,
-    create_mode  => '0644',
-    create_owner => $user,
-    create_group => $group,
-  }
-
-  $rpm_dependencies = [
-    'libffi-devel',
-    'libxml2-devel',
-    'libxslt-devel',
-    'openldap-devel',
-    'openssl-devel',
-    'zlib-devel',
-  ]
-
-  ensure_packages( $rpm_dependencies )
-
-  python::virtualenv { $path:
-    ensure  => present,
-    owner   => $user,
-    group   => $group,
-    version => 'system',
-  }
+  assert_private()
 
   Python::Pip {
     ensure     => present,
     virtualenv => $path,
   }
-
-  $pip_dependencies = [
-    'django-auth-ldap',
-    'hiredis',
-    'nydus',
-    'psycopg2',
-    'python-memcached',
-    'python-ldap',
-    'redis',
-  ]
-
-  python::pip { $pip_dependencies: }
 
   python::pip { 'sentry':
     ensure => $version,

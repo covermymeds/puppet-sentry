@@ -48,8 +48,6 @@
 #
 # ssl_*: Apache SSL controls
 #
-# team: name of the default team to create and use for new projects
-#
 # url: source URL from which to install Sentry.  (false, use PyPI)
 #
 # user: UNIX user to own virtualenv, and run background workers (sentry)
@@ -104,7 +102,6 @@ class sentry (
   $ssl_chain         = $sentry::params::ssl_chain,
   $ssl_cert          = $sentry::params::ssl_cert,
   $ssl_key           = $sentry::params::ssl_key,
-  $team              = $sentry::params::team,
   $url               = $sentry::params::url,
   $user              = $sentry::params::user,
   $version           = $sentry::params::version,
@@ -113,53 +110,25 @@ class sentry (
   $wsgi_threads      = $sentry::params::wsgi_threads,
 ) inherits ::sentry::params {
 
-  # Install Sentry
-  class { 'sentry::install':
-    admin_email       => $admin_email,
-    admin_password    => $admin_password,
-    extensions        => $extensions,
-    group             => $group,
-    organization      => $organization,
-    path              => $path,
-    project           => $project,
-    ldap_auth_version => $ldap_auth_version,
-    team              => $team,
-    user              => $user,
-    version           => $version,
+  if $version != 'latest' {
+    if versioncmp('8.4.0', $version) > 0 {
+      fail('Sentry version 8.4.0 or greater is required.')
+    }
   }
 
-  file { "${path}/sentry.conf.py":
-    ensure  => present,
-    content => template('sentry/sentry.conf.py.erb'),
-    notify  => Class['sentry::service'],
-  }
+  # establish resource containment
+  contain '::sentry::setup'
+  contain '::sentry::config'
+  contain '::sentry::install'
+  contain '::sentry::service'
+  contain '::sentry::wsgi'
 
-  file { "${path}/config.yml":
-    ensure  => present,
-    content => template('sentry/config.yml.erb'),
-    notify  => Class['sentry::service'],
-  }
-
-  # set up WSGI
-  class { 'sentry::wsgi':
-    path           => $path,
-    ssl_ca         => $ssl_ca,
-    ssl_chain      => $ssl_chain,
-    ssl_cert       => $ssl_cert,
-    ssl_key        => $ssl_key,
-    vhost          => $vhost,
-    wsgi_processes => $wsgi_processes,
-    wsgi_threads   => $wsgi_threads,
-    subscribe      => Class['sentry::install'],
-  }
-
-  # set up the Sentry background worker(s)
-  class { 'sentry::service':
-    user      => $user,
-    group     => $group,
-    path      => $path,
-    subscribe => File["${path}/sentry.conf.py"],
-  }
+  # establish resource precedence and notifications
+  Class['::sentry::setup'] ~>
+  Class['::sentry::config'] ~>
+  Class['::sentry::install'] ~>
+  Class['::sentry::service'] ~>
+  Class['::sentry::wsgi']
 
   # Write out a list of "team/project dsn" values to a file.
   # Apache will serve this list and Puppet will consume to set
@@ -168,7 +137,7 @@ class sentry (
     ensure  => present,
     mode    => '0755',
     content => template('sentry/dsn_mapper.py.erb'),
-    require => File["${path}/sentry.conf.py"],
+    require => Class['::sentry::install'],
   }
 
   # this creates the DSN file for each project, daily.
@@ -177,6 +146,7 @@ class sentry (
     user    => root,
     minute  => 5,
     hour    => 2,
+    require => Class['::sentry::install'],
   }
 
   # run the Sentry cleanup process daily
@@ -185,16 +155,17 @@ class sentry (
     user    => $user,
     minute  => 15,
     hour    => 1,
+    require => Class['::sentry::install'],
   }
 
   file { "${path}/create_project.py":
     ensure  => present,
     mode    => '0755',
     content => template('sentry/create_project.py.erb'),
-    require => File["${path}/sentry.conf.py"],
+    require => Class['::sentry::install'],
   }
 
   # Collect the projects from exported resources
-  include sentry::server::collect
+  include ::sentry::server::collect
 
 }
