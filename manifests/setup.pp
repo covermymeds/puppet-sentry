@@ -45,6 +45,7 @@ class sentry::setup (
 
   $rpm_dependencies = [
     'libffi-devel',
+    'libjpeg-turbo-devel',
     'libxml2-devel',
     'libxslt-devel',
     'openldap-devel',
