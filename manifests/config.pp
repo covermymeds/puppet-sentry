@@ -18,12 +18,16 @@ class sentry::config (
   $ldap_password     = $sentry::ldap_password,
   $memcached_host    = $sentry::memcached_host,
   $memcached_port    = $sentry::memcached_port,
+  $metrics_enable    = $sentry::metrics_enable,
+  $metrics_backend   = $sentry::metrics_backend,
   $organization      = $sentry::organization,
   $path              = $sentry::path,
   $redis_host        = $sentry::redis_host,
   $redis_port        = $sentry::redis_port,
   $secret_key        = $sentry::secret_key,
   $smtp_host         = $sentry::smtp_host,
+  $statsd_host       = $sentry::statsd_host,
+  $statsd_port       = $sentry::statsd_port,
   $user              = $sentry::user,
 ) {
   assert_private()

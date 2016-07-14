@@ -186,3 +186,16 @@ AUTH_LDAP_SENTRY_ORGANIZATION_GLOBAL_ACCESS = True
 <%= conf %>
 <% end -%>
 <% end -%>
+
+<% if @metrics_enable -%>
+#############
+## Metrics ##
+#############
+<% if @metrics_backend == 'statsd' -%>
+SENTRY_METRICS_BACKEND = 'sentry.metrics.statsd.StatsdMetricsBackend'
+SENTRY_METRICS_OPTIONS = {
+    'host': '<%= @statsd_host %>',
+    'port': <%= @statsd_port %>,
+}
+<% end -%>
+<% end -%>

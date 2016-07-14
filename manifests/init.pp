@@ -34,6 +34,10 @@
 #
 # memcached_port: port to use for memcached (11211)
 #
+# metrics_enable: whether to enable the sentry metrics (false)
+#
+# metrics_backend: which metrics backend to enable (statsd)
+#
 # organization: default organization to create, and in which to create new users
 #
 # path: path into which to install Sentry, and create the virtualenv (/srv/sentry)
@@ -47,6 +51,10 @@
 # smtp_host: name or IP of SMTP server (localhost)
 #
 # ssl_*: Apache SSL controls
+#
+# statsd_host: hostname of statsd server (localhost)
+#
+# statsd_port: port for statsd server (8125)
 #
 # url: source URL from which to install Sentry.  (false, use PyPI)
 #
@@ -93,6 +101,8 @@ class sentry (
   $ldap_password      = $sentry::params::ldap_password,
   $memcached_host     = $sentry::params::memcached_host,
   $memcached_port     = $sentry::params::memcached_port,
+  Boolean         $metrics_enable     = $sentry::params::metrics_enable,
+  Enum['statsd']  $metrics_backend    = $sentry::params::metrics_backend,
   $organization       = $sentry::params::organization,
   $path               = $sentry::params::path,
   $project            = $sentry::params::project,
@@ -104,6 +114,8 @@ class sentry (
   $ssl_chain          = $sentry::params::ssl_chain,
   $ssl_cert           = $sentry::params::ssl_cert,
   $ssl_key            = $sentry::params::ssl_key,
+  String  $statsd_host        = $sentry::params::statsd_host,
+  Integer $statsd_port        = $sentry::params::statsd_port,
   $url                = $sentry::params::url,
   $user               = $sentry::params::user,
   $version            = $sentry::params::version,
