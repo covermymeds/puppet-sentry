@@ -34,6 +34,10 @@
 #
 # memcached_port: port to use for memcached (11211)
 #
+# metrics_enable: whether to enable the sentry metrics (false)
+#
+# metrics_backend: which metrics backend to enable (statsd)
+#
 # organization: default organization to create, and in which to create new users
 #
 # path: path into which to install Sentry, and create the virtualenv (/srv/sentry)
@@ -47,6 +51,10 @@
 # smtp_host: name or IP of SMTP server (localhost)
 #
 # ssl_*: Apache SSL controls
+#
+# statsd_host: hostname of statsd server (localhost)
+#
+# statsd_port: port for statsd server (8125)
 #
 # url: source URL from which to install Sentry.  (false, use PyPI)
 #

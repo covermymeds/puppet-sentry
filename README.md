@@ -104,6 +104,8 @@ Class parameters:
 * **ldap_* **: LDAP connection details used for creating local user accounts from AD users
 * **memcached_host**: name or IP of memcached server (localhost)
 * **memcached_port**: port to use for memcached (11211)
+* **metrics_enable**: whether to enable the sentry metrics (false)
+* **metrics_backend**: which metrics backend to enable (statsd)
 * **organization**: default organization to create, and in which to create new users
 * **path**: path into which to install Sentry, and create the virtualenv (/srv/sentry)
 * **redis_host**: name or IP of Redis server (localhost)
@@ -111,11 +113,14 @@ Class parameters:
 * **secret_key**: string used to hash cookies (fqdn_rand_string(40))
 * **smtp_host**: name or IP of SMTP server (localhost)
 * **ssl_* **: Apache SSL controls.  The `ssl_cert` and `ssl_key` parameters reference files on the Sentry server. Your Sentry profile class or other higher level class should manage the installation of these file resources.
+* **statsd_host**: hostname of statsd server (localhost)
+* **statsd_port**: port for statsd server (8125)
 * **url**: source URL form which to install Sentry (false, use [PyPI](https://pypi.python.org/pypi/sentry/))
 * **user**: UNIX user to own virtualenv, and run background workers (sentry)
 * **version**: the Sentry version to install
 * **vhost**: the URL at which users will access the Sentry GUI
 * **wsgi_* **: mod_wsgi controls
+* **worker_concurrency**: number of concurrent workers
 
 ### sentry::setup
 This private class ensures that all of the Sentry prerequisites are installed.  It will create the direcotry into which Sentry will be installed, create the Sentry user and group, create a Python virtual environment, and install the RPM and `pip` dependencies.
