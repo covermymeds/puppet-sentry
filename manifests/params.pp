@@ -22,6 +22,8 @@ class sentry::params {
   $ldap_member_type   = 'ADMIN'
   $memcached_host     = 'localhost'
   $memcached_port     = '11211'
+  $metrics_enable     = false
+  $metrics_backend    = 'statsd'
   $organization       = 'Default'
   $path               = '/srv/sentry'
   $project            = 'Default'
@@ -33,6 +35,8 @@ class sentry::params {
   $ssl_chain          = undef
   $ssl_cert           = '/etc/pki/tls/certs/localhost.crt'
   $ssl_key            = '/etc/pki/tls/private/localhost.key'
+  $statsd_host        = 'localhost'
+  $statsd_port        = 8125
   $url                = false
   $user               = 'sentry'
   $version            = 'latest'
