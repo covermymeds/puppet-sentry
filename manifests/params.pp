@@ -9,7 +9,7 @@ class sentry::params {
   $db_password        = 'sentry'
   $db_port            = '5432'
   $db_user            = 'sentry'
-  $email_from         = "sentry@$::fqdn"
+  $email_from         = "sentry@${::fqdn}"
   $extensions         = {}
   $group              = 'sentry'
   $ldap_auth_version  = 'present'
