@@ -89,6 +89,7 @@ class sentry (
   $db_password        = $sentry::params::db_password,
   $db_port            = $sentry::params::db_port,
   $db_user            = $sentry::params::db_user,
+  $email_from         = $sentry::params::email_from,
   $extensions         = $sentry::params::extensions,
   $group              = $sentry::params::group,
   $ldap_auth_version  = $sentry::params::ldap_auth_version,
