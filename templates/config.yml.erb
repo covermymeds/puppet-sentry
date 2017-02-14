@@ -13,7 +13,7 @@ redis.clusters:
       0:
         host: '<%= @redis_host %>'
         port: <%= @redis_port %>
-mail.from: 'sentry@<%= @fqdn %>'
+mail.from: '<%= @email_from %>'
 mail.host: '<%= @smtp_host %>'
 mail.port: 25
 mail.username: ''
