@@ -8,6 +8,7 @@ class sentry::config (
   $db_password       = $sentry::db_password,
   $db_port           = $sentry::db_port,
   $db_user           = $sentry::db_user,
+  $email_from        = $sentry::email_from,
   $group             = $sentry::group,
   $ldap_base_ou      = $sentry::ldap_base_ou,
   $ldap_domain       = $sentry::ldap_domain,
