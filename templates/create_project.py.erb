@@ -9,7 +9,6 @@ from urllib import quote
 # Add the project to the python path
 activate_this = '<%= @path %>/bin/activate_this.py'
 execfile(activate_this, dict(__file__=activate_this))
-os.environ['SENTRY_CONF'] = '<%= @path %>'
 
 from sentry.utils.runner import configure
 configure()
@@ -24,11 +23,15 @@ def build_parser():
     parser.add_option("-o", "--org", dest="org", help="Organization to own this project (<%= @organization %>)", type="string", default="<%= @organization %>")
     parser.add_option("-t", "--team", dest="team", help="Team to own this project (<%= @team %>)", type="string", default="<%= @team %>")
     parser.add_option("-v", "--verbose", dest="verbose", help="Verbose output", action="store_true")
+    parser.add_option("-s", "--sentry-path", dest="sentry_path", help="Path to sentry project", action="store_true", required=True)
     return parser
 
 def main():
   parser = build_parser()
   options, _args = parser.parse_args()
+
+  os.environ['SENTRY_CONF'] = options.sentry_path
+
   if not options.project:
     parser.error("Project name required")
   if not options.platform:
@@ -90,7 +93,8 @@ def main():
   # create a static file containing this application's DSN
   k = ProjectKey.objects.get(project_id=p.id).get_dsn()
   prefix = quote(o.name.lower() + "-" + t.name.lower() + "-")
-  dsn = open('<%= @path %>/dsn/' + prefix + p.name, 'a')
+  dsn_path = "%s/dsn/%s%s" % (options.sentry_path, prefix, p.name)
+  dsn = open(dsn_path, 'a')
   dsn.write(k)
   dsn.close()
 
