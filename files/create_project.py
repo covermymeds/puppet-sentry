@@ -20,6 +20,7 @@ def build_parser():
     parser.add_option("-t", "--team", dest="team", help="Team to own this project", type="string", required=True)
     parser.add_option("-v", "--verbose", dest="verbose", help="Verbose output", action="store_true")
     parser.add_option("-s", "--sentry-path", dest="sentry_path", help="Path to sentry project", action="store_true", required=True)
+    parser.add_option("-e", "--email", dest="email", help="Email address for administrator", action="store_true", required=True)
     return parser
 
 def main():
@@ -36,9 +37,9 @@ def main():
   # try to load the requested organization
   # and the admin user, who will own all new projects and teams
   e = False
-  try:  
+  try:
     o = Organization.objects.get(name=options.org)
-    u = User.objects.get(email='<%= @admin_email %>')
+    u = User.objects.get(email=options.email)
   except:
     e = sys.exc_info()[0]
   if e:
