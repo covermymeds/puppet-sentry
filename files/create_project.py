@@ -6,10 +6,6 @@ import os, sys, site
 from optparse import OptionParser
 from urllib import quote
 
-# Add the project to the python path
-activate_this = '<%= @path %>/bin/activate_this.py'
-execfile(activate_this, dict(__file__=activate_this))
-
 from sentry.utils.runner import configure
 configure()
 
