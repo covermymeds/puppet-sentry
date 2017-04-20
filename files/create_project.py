@@ -65,36 +65,25 @@ def main():
   try:
     p = Project.objects.get(name=options.project,team_id=t.id)
   except:
-    p = False
+    # the project doesn't exist.  Create it!
+    p = Project()
+    # ensure all project names are in lowercase
+    p.name = options.project.lower()
+    p.team_id = t.id
+    p.organization_id = o.id
+    p.platform = options.platform
 
-  if p:
-    if options.verbose:
-      print 'Project %s exists in team %s' % (options.project, t.name)
-    sys.exit(1)
-
-  # the project doesn't exist.  Create it!
-  p = Project()
-  # ensure all project names are in lowercase
-  p.name = options.project.lower()
-  p.team_id = t.id
-  p.organization_id = o.id
-  p.platform = options.platform
-  try:
-    p.save()
-  except:
-    e = sys.exc_info()[0]
-
-  if e:
-    # an error occured
-    if options.verbose:
+    try:
+      p.save()
+    except:
       print "Project save failed for %s: %s" % (options.project, e)
-    sys.exit(1)
+      sys.exit(1)
 
   # create a static file containing this application's DSN
   k = ProjectKey.objects.get(project_id=p.id).get_dsn()
   prefix = quote(o.name.lower() + "-" + t.name.lower() + "-")
   dsn_path = "%s/dsn/%s%s" % (options.sentry_path, prefix, p.name)
-  dsn = open(dsn_path, 'a')
+  dsn = open(dsn_path, 'w')
   dsn.write(k)
   dsn.close()
 
