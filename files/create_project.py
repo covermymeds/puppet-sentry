@@ -5,6 +5,7 @@
 import os, sys, site
 from optparse import OptionParser
 from urllib import quote
+import yaml
 
 from sentry.utils.runner import configure
 configure()
@@ -20,14 +21,21 @@ def build_parser():
     parser.add_option("-t", "--team", dest="team", help="Team to own this project", type="string", required=True)
     parser.add_option("-v", "--verbose", dest="verbose", help="Verbose output", action="store_true")
     parser.add_option("-s", "--sentry-path", dest="sentry_path", help="Path to sentry project", action="store_true", required=True)
-    parser.add_option("-e", "--email", dest="email", help="Email address for administrator", action="store_true", required=True)
     return parser
+
+def read_sentry_config(path):
+  with open("%s/config.yml" % path, 'r') as sentry_config:
+    data = yaml.load(sentry_config)
+
+  return data['system.admin-email']
 
 def main():
   parser = build_parser()
   options, _args = parser.parse_args()
 
   os.environ['SENTRY_CONF'] = options.sentry_path
+
+  admin_email = read_sentry_config(options.sentry_path)
 
   if not options.project:
     parser.error("Project name required")
@@ -41,9 +49,9 @@ def main():
     sys.exit(1)
 
   try:
-    u = User.objects.get(email=options.email)
+    u = User.objects.get(email=admin_email)
   except User.DoesNotExist:
-    print "Admin user not found: %s" % options.email
+    print "Admin user not found: %s" % admin_email
     sys.exit(1)
 
   # try to load the requested team
