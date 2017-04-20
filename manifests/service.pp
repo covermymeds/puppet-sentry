@@ -3,12 +3,6 @@
 # This class is meant to be called from sentry.
 # It ensures the background services are running via systemd
 #
-# === Parameters
-#
-# user: UNIX user to run Sentry services
-# group: UNIX group to run Sentry services
-# path: path to Sentry installation / virtualenv
-#
 # === Authors
 #
 # Dan Sajner <dsajner@covermymeds.com>
@@ -17,6 +11,12 @@
 # === Copyright
 #
 # Copyright 2015 CoverMyMeds
+#
+# === Params
+#
+# @param user UNIX user to run Sentry services
+# @param group UNIX group to run Sentry services
+# @param path path to Sentry installation / virtualenv
 #
 class sentry::service (
   $user = $sentry::user,
@@ -60,7 +60,15 @@ class sentry::service (
   # beat no longer exists
   file { '/etc/systemd/system/sentry-beat.service':
     ensure => absent,
-    notify => Exec['enable-sentry-services'],
+    notify => [Exec['enable-sentry-services'], Exec['kill-deprecated-beat']],
+  }
+
+  exec { 'kill-deprecated-beat':
+    command     => 'kill $(cat /var/lib/sentry/sentry-beat.pid)',
+    onlyif      => 'test -e /var/lib/sentry/sentry-beat.pid',
+    path        => '/bin:/usr/bin',
+    refreshonly => true,
+    before      => Service['sentry-cron'],
   }
 
   # Sentry Cron
