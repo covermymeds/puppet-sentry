@@ -2,73 +2,6 @@
 #
 # Install Sentry from PyPI and configure an Apache mod_wsgi vhost
 #
-# === Parameters
-#
-# admin_email: the admin user's email address; also used as login name (root@localhost)
-#
-# admin_password: the admin user's password (admin)
-#
-# custom_config: array of custom configs to put into config.yml (undef)
-#
-# custom_settings: arrray of custom settings to put into sentry.conf.py (undef)
-#
-# db_host: the PostgreSQL database host (localhost)
-#
-# db_name: the name of the PostgreSQL database to use (sentry)
-#
-# db_password: the DB user's password (sentry)
-#
-# db_port: the PostgreSQL database port (5432)
-#
-# db_user: the user account with which to connect to the database (sentry)
-#
-# extensions: hash of sentry extensions and source URL to install (sentry-github)
-#
-# group: UNIX group to own virtualenv, and run background workers (sentry)
-#
-# ldap_auth_version: version of the sentry_ldap_auth Python module to install (present)
-#
-# ldap_*: LDAP connection details used for creating local user accounts from AD users
-#
-# memcached_host: name or IP of memcached server (localhost)
-#
-# memcached_port: port to use for memcached (11211)
-#
-# metrics_enable: whether to enable the sentry metrics (false)
-#
-# metrics_backend: which metrics backend to enable (statsd)
-#
-# organization: default organization to create, and in which to create new users
-#
-# path: path into which to install Sentry, and create the virtualenv (/srv/sentry)
-#
-# redis_host: name or IP of Redis server (localhost)
-#
-# redis_port: port to use for Redis (6379)
-#
-# secret_key: string used to hash cookies (fqdn_rand_string(40))
-#
-# smtp_host: name or IP of SMTP server (localhost)
-#
-# ssl_*: Apache SSL controls
-#
-# statsd_host: hostname of statsd server (localhost)
-#
-# statsd_port: port for statsd server (8125)
-#
-# url: source URL from which to install Sentry.  (false, use PyPI)
-#
-# user: UNIX user to own virtualenv, and run background workers (sentry)
-#
-# version: the Sentry version to install
-#
-# vhost: the URL at which users will access the Sentry GUI
-#
-# wsgi_*: mod_wsgi controls
-#
-# worker_concurrency: number of concurrent workers (processors.count)
-#
-#
 # === Authors
 # Dan Sajner <dsajner@covermymeds.com>
 # Scott Merrill <smerrill@covermymeds.com>
@@ -79,9 +12,58 @@
 # === License
 # Released under the terms of the MIT license.  See LICENSE for more details
 #
+# === Params
+#
+# @param admin_email the admin user's email address; also used as login name (root@localhost)
+# @param admin_password the admin user's password (admin)
+# @param bootstrap Whether this node will bootstrap the database, admin, etc
+# @param custom_config array of custom configs to put into config.yml (undef)
+# @param custom_settings arrray of custom settings to put into sentry.conf.py (undef)
+# @param db_host the PostgreSQL database host (localhost)
+# @param db_name the name of the PostgreSQL database to use (sentry)
+# @param db_password the DB user's password (sentry)
+# @param db_port the PostgreSQL database port (5432)
+# @param db_user the user account with which to connect to the database (sentry)
+# @param email_from Email address sentry emails will come from
+# @param extensions hash of sentry extensions and source URL to install (sentry-github)
+# @param group UNIX group to own virtualenv, and run background workers (sentry)
+# @param ldap_auth_version version of the sentry_ldap_auth Python module to install (present)
+# @param ldap_base_ou LDAP connection details used for creating local user accounts from AD users
+# @param ldap_domain LDAP connection details used for creating local user accounts from AD users
+# @param ldap_group_base LDAP connection details used for creating local user accounts from AD users
+# @param ldap_group_dn LDAP connection details used for creating local user accounts from AD users
+# @param ldap_host LDAP connection details used for creating local user accounts from AD users
+# @param ldap_user LDAP bind user
+# @param ldap_password LDAP bind password
+# @param memcached_host name or IP of memcached server (localhost)
+# @param memcached_port port to use for memcached (11211)
+# @param metrics_enable whether to enable the sentry metrics (false)
+# @param metrics_backend which metrics backend to enable (statsd)
+# @param organization default organization to create, and in which to create new users
+# @param path path into which to install Sentry, and create the virtualenv (/srv/sentry)
+# @param project Default project name
+# @param redis_host name or IP of Redis server (localhost)
+# @param redis_port port to use for Redis (6379)
+# @param secret_key string used to hash cookies (fqdn_rand_string(40))
+# @param smtp_host name or IP of SMTP server (localhost)
+# @param ssl_ca Apache SSL CA cert
+# @param ssl_chain Apache SSL Intermediate CA cert
+# @param ssl_cert Apache SSL public cert
+# @param ssl_key Apache SSL private key
+# @param statsd_host hostname of statsd server (localhost)
+# @param statsd_port port for statsd server (8125)
+# @param url source URL from which to install Sentry.  (false, use PyPI)
+# @param user UNIX user to own virtualenv, and run background workers (sentry)
+# @param version the Sentry version to install
+# @param vhost the URL at which users will access the Sentry GUI
+# @param wsgi_processes mod_wsgi processes
+# @param wsgi_threads mod_wsgi threads
+# @param worker_concurrency number of concurrent workers (processors.count)
+#
 class sentry (
   $admin_email        = $sentry::params::admin_email,
   $admin_password     = $sentry::params::admin_password,
+  Boolean $bootstrap  = $sentry::params::bootstrap,
   $custom_config      = $sentry::params::custom_conifg,
   $custom_settings    = $sentry::params::custom_settings,
   $db_host            = $sentry::params::db_host,
