@@ -16,8 +16,8 @@ def build_parser():
     parser = OptionParser()
     parser.add_option("-p", "--project", dest="project", help="Application/Project name.", type="string")
     parser.add_option("-l", "--platform", dest="platform", help="Application Language/Platform.", type="string")
-    parser.add_option("-o", "--org", dest="org", help="Organization to own this project (<%= @organization %>)", type="string", default="<%= @organization %>")
-    parser.add_option("-t", "--team", dest="team", help="Team to own this project (<%= @team %>)", type="string", default="<%= @team %>")
+    parser.add_option("-o", "--org", dest="org", help="Organization to own this project", type="string", required=True)
+    parser.add_option("-t", "--team", dest="team", help="Team to own this project", type="string", required=True)
     parser.add_option("-v", "--verbose", dest="verbose", help="Verbose output", action="store_true")
     parser.add_option("-s", "--sentry-path", dest="sentry_path", help="Path to sentry project", action="store_true", required=True)
     return parser
