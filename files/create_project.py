@@ -5,13 +5,14 @@
 import os, sys, site
 from optparse import OptionParser
 from urllib import quote
-import yaml
 
 from sentry.utils.runner import configure
 configure()
 
 # Add in the sentry object models
 from sentry.models import Organization, Project, ProjectKey, Team, User
+
+from django.conf import settings
 
 def build_parser():
     parser = OptionParser()
@@ -23,19 +24,13 @@ def build_parser():
     parser.add_option("-s", "--sentry-path", dest="sentry_path", help="Path to sentry project", action="store_true", required=True)
     return parser
 
-def read_sentry_config(path):
-  with open("%s/config.yml" % path, 'r') as sentry_config:
-    data = yaml.load(sentry_config)
-
-  return data['system.admin-email']
-
 def main():
   parser = build_parser()
   options, _args = parser.parse_args()
 
   os.environ['SENTRY_CONF'] = options.sentry_path
 
-  admin_email = read_sentry_config(options.sentry_path)
+  admin_email = settings.SENTRY_OPTIONS['system.admin-email']
 
   if not options.project:
     parser.error("Project name required")
