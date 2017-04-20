@@ -5,6 +5,9 @@
 
 # If this file ever becomes compromised, it's important to regenerate your SECRET_KEY
 # Changing this value will result in all current sessions being invalidated
+filestore.backend: 'django.core.files.storage.FileSystemStorage'
+filestore.options:
+  location: '/tmp/sentry-files'
 system.url-prefix: '<%= @_url_prefix %>'
 system.secret-key: '<%= @secret_key %>'
 system.admin-email: '<%= @admin_email %>'

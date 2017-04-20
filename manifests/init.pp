@@ -115,8 +115,8 @@ class sentry (
 ) inherits ::sentry::params {
 
   if $version != 'latest' {
-    if versioncmp('8.5.0', $version) > 0 {
-      fail('Sentry version 8.5.0 or greater is required.')
+    if versioncmp('8.10.0', $version) > 0 {
+      fail('Sentry version 8.10.0 or greater is required.')
     }
   }
 
