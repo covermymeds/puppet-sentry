@@ -34,16 +34,16 @@ def main():
   if not options.platform:
     parser.error("Platform is required")
 
-  # try to load the requested organization
-  # and the admin user, who will own all new projects and teams
-  e = False
   try:
     o = Organization.objects.get(name=options.org)
+  except Organization.DoesNotExist:
+    print "Organization not found: %s" % options.org
+    sys.exit(1)
+
+  try:
     u = User.objects.get(email=options.email)
-  except:
-    e = sys.exc_info()[0]
-  if e:
-    print "Error loading Sentry environment: %s" % (e)
+  except User.DoesNotExist:
+    print "Admin user not found: %s" % options.email
     sys.exit(1)
 
   # try to load the requested team
