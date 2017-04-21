@@ -7,14 +7,6 @@ import sys
 from optparse import OptionParser
 from urllib import quote
 
-from sentry.utils.runner import configure
-configure()
-
-from django.conf import settings
-
-# Add in the sentry object models
-from sentry.models import Organization, Project, ProjectKey, Team, User
-
 
 def build_parser():
     parser = OptionParser()
@@ -23,7 +15,7 @@ def build_parser():
     parser.add_option("-o", "--org", dest="org", help="Organization to own this project", type="string")
     parser.add_option("-t", "--team", dest="team", help="Team to own this project", type="string")
     parser.add_option("-v", "--verbose", dest="verbose", help="Verbose output", action="store_true")
-    parser.add_option("-s", "--sentry-path", dest="sentry_path", help="Path to sentry project", action="store_true")
+    parser.add_option("-s", "--sentry-path", dest="sentry_path", help="Path to sentry project", type="string")
     return parser
 
 
@@ -32,6 +24,13 @@ def main():
     options, _args = parser.parse_args()
 
     os.environ['SENTRY_CONF'] = options.sentry_path
+
+    from sentry.utils.runner import configure
+    configure()
+
+    from django.conf import settings
+    # Add in the sentry object models
+    from sentry.models import Organization, Project, ProjectKey, Team, User
 
     admin_email = settings.SENTRY_OPTIONS['system.admin-email']
 
