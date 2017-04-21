@@ -7,12 +7,13 @@ import sys
 from optparse import OptionParser
 from urllib import quote
 
-# Add in the sentry object models
-from sentry.models import Organization, Project, ProjectKey, Team, User
-from django.conf import settings
-
 from sentry.utils.runner import configure
 configure()
+
+from django.conf import settings
+
+# Add in the sentry object models
+from sentry.models import Organization, Project, ProjectKey, Team, User
 
 
 def build_parser():
