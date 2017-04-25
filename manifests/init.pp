@@ -59,6 +59,7 @@
 # @param wsgi_processes mod_wsgi processes
 # @param wsgi_threads mod_wsgi threads
 # @param worker_concurrency number of concurrent workers (processors.count)
+# @param workers_enabled Should the worker and cron services be running
 #
 class sentry (
   $admin_email        = $sentry::params::admin_email,
@@ -105,7 +106,8 @@ class sentry (
   $vhost              = $sentry::params::vhost,
   $wsgi_processes     = $sentry::params::wsgi_processes,
   $wsgi_threads       = $sentry::params::wsgi_threads,
-  $worker_concurrency = $sentry::params::worker_concurrency
+  $worker_concurrency = $sentry::params::worker_concurrency,
+  Boolean $workers_enabled = true,
 ) inherits ::sentry::params {
 
   if $version != 'latest' {

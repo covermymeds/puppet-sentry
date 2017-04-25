@@ -17,12 +17,20 @@
 # @param user UNIX user to run Sentry services
 # @param group UNIX group to run Sentry services
 # @param path path to Sentry installation / virtualenv
+# @param workers_enabled Should the worker and cron services be running
 #
 class sentry::service (
   $user = $sentry::user,
   $group = $sentry::group,
   $path = $sentry::path,
+  Boolean $workers_enabled = $sentry::workers_enabled,
 ) {
+
+  if $workers_enabled {
+    $_service_ensure = 'running'
+  } else {
+    $_service_ensure = 'stopped'
+  }
 
   exec { 'enable-sentry-services':
     command     => '/usr/bin/systemctl daemon-reload',
@@ -41,8 +49,8 @@ class sentry::service (
   }
 
   service { 'sentry-worker':
-    ensure     => running,
-    enable     => true,
+    ensure     => $_service_ensure,
+    enable     => $workers_enabled,
     hasrestart => true,
     require    => [ File['/etc/systemd/system/sentry-worker.service'],
                     User[$user],
@@ -82,8 +90,8 @@ class sentry::service (
   }
 
   service { 'sentry-cron':
-    ensure     => running,
-    enable     => true,
+    ensure     => $_service_ensure,
+    enable     => $workers_enabled,
     hasrestart => true,
     require    => [ File['/etc/systemd/system/sentry-cron.service'],
                     User[$user],
