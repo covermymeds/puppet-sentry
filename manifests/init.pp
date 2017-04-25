@@ -16,6 +16,7 @@
 #
 # @param admin_email the admin user's email address; also used as login name (root@localhost)
 # @param admin_password the admin user's password (admin)
+# @param apache_enabled Whether to enable/start the apache service
 # @param bootstrap Whether this node will bootstrap the database, admin, etc
 # @param custom_config array of custom configs to put into config.yml (undef)
 # @param custom_settings arrray of custom settings to put into sentry.conf.py (undef)
@@ -63,6 +64,7 @@
 class sentry (
   $admin_email                     = $sentry::params::admin_email,
   $admin_password                  = $sentry::params::admin_password,
+  Boolean $apache_enabled          = true,
   Boolean $bootstrap               = $sentry::params::bootstrap,
   $custom_config                   = $sentry::params::custom_conifg,
   $custom_settings                 = $sentry::params::custom_settings,

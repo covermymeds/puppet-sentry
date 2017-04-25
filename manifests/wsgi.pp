@@ -14,6 +14,7 @@
 #
 # === Params
 #
+# @param apache_enabled Whether to enable/start the apache service
 # @param path the virtualenv path for your Sentry installation
 # @param publish_dsns whether or not to make each Sentry application's DSN accessible via http(s)
 # @param ssl whether or not to enable SSL support
@@ -26,17 +27,24 @@
 # @param wsgi_threads the number of mod_wsgi threads to use
 #
 class sentry::wsgi (
-  $path           = $sentry::path,
-  $publish_dsns   = true,
-  $ssl            = true,
-  $ssl_ca         = $sentry::ssl_ca,
-  $ssl_chain      = $sentry::ssl_chain,
-  $ssl_cert       = $sentry::ssl_cert,
-  $ssl_key        = $sentry::ssl_key,
-  $vhost          = $sentry::vhost,
-  $wsgi_processes = $sentry::wsgi_processes,
-  $wsgi_threads   = $sentry::wsgi_threads,
+  Boolean $apache_enabled = $sentry::apache_enabled,
+  $path                   = $sentry::path,
+  $publish_dsns           = true,
+  $ssl                    = true,
+  $ssl_ca                 = $sentry::ssl_ca,
+  $ssl_chain              = $sentry::ssl_chain,
+  $ssl_cert               = $sentry::ssl_cert,
+  $ssl_key                = $sentry::ssl_key,
+  $vhost                  = $sentry::vhost,
+  $wsgi_processes         = $sentry::wsgi_processes,
+  $wsgi_threads           = $sentry::wsgi_threads,
 ) {
+
+  if $apache_enabled {
+    $_apache_service_ensure = 'running'
+  } else {
+    $_apache_service_ensure = 'stopped'
+  }
 
   # this is a null declaration to ensure that the Apache module
   # doesn't try to helpfully create the docroot.
@@ -46,6 +54,8 @@ class sentry::wsgi (
     default_mods    => false,
     default_vhost   => false,
     purge_configs   => true,
+    service_enable  => $apache_enabled,
+    service_ensure  => $_apache_service_ensure,
     service_restart => '/usr/sbin/apachectl graceful',
     trace_enable    => 'Off',
   }
