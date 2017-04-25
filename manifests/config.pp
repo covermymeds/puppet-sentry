@@ -29,9 +29,16 @@ class sentry::config (
   $smtp_host         = $sentry::smtp_host,
   $statsd_host       = $sentry::statsd_host,
   $statsd_port       = $sentry::statsd_port,
+  $url_prefix        = $sentry::url_prefix,
   $user              = $sentry::user,
 ) {
   assert_private()
+
+  if $url_prefix {
+    $_url_prefix = $url_prefix
+  } else {
+    $_url_prefix = "https://${sentry::vhost}"
+  }
 
   file { "${path}/sentry.conf.py":
     ensure  => present,

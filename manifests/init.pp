@@ -55,6 +55,7 @@
 # @param url source URL from which to install Sentry.  (false, use PyPI)
 # @param user UNIX user to own virtualenv, and run background workers (sentry)
 # @param version the Sentry version to install
+# @param url_prefix Sentry URL for error reporting, used when generating DSN files
 # @param vhost the URL at which users will access the Sentry GUI
 # @param wsgi_processes mod_wsgi processes
 # @param wsgi_threads mod_wsgi threads
@@ -102,6 +103,7 @@ class sentry (
   $url                = $sentry::params::url,
   $user               = $sentry::params::user,
   $version            = $sentry::params::version,
+  Variant[Undef,String] $url_prefix  = undef,
   $vhost              = $sentry::params::vhost,
   $wsgi_processes     = $sentry::params::wsgi_processes,
   $wsgi_threads       = $sentry::params::wsgi_threads,
