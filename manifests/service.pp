@@ -3,12 +3,6 @@
 # This class is meant to be called from sentry.
 # It ensures the background services are running via systemd
 #
-# === Parameters
-#
-# user: UNIX user to run Sentry services
-# group: UNIX group to run Sentry services
-# path: path to Sentry installation / virtualenv
-#
 # === Authors
 #
 # Dan Sajner <dsajner@covermymeds.com>
@@ -17,6 +11,12 @@
 # === Copyright
 #
 # Copyright 2015 CoverMyMeds
+#
+# === Params
+#
+# @param user UNIX user to run Sentry services
+# @param group UNIX group to run Sentry services
+# @param path path to Sentry installation / virtualenv
 #
 class sentry::service (
   $user = $sentry::user,
@@ -57,28 +57,42 @@ class sentry::service (
     subscribe   => Class['::sentry::config'],
   }
 
-  # Sentry Celery Beat
+  # beat no longer exists
   file { '/etc/systemd/system/sentry-beat.service':
+    ensure => absent,
+    notify => [Exec['enable-sentry-services'], Exec['kill-deprecated-beat']],
+  }
+
+  exec { 'kill-deprecated-beat':
+    command     => 'kill $(cat /var/lib/sentry/sentry-beat.pid)',
+    onlyif      => 'test -e /var/lib/sentry/sentry-beat.pid',
+    path        => '/bin:/usr/bin',
+    refreshonly => true,
+    before      => Service['sentry-cron'],
+  }
+
+  # Sentry Cron
+  file { '/etc/systemd/system/sentry-cron.service':
     ensure  => present,
     mode    => '0644',
     owner   => 'root',
     group   => 'root',
-    content => template('sentry/sentry-beat.service.erb'),
+    content => template('sentry/sentry-cron.service.erb'),
     notify  => Exec['enable-sentry-services'],
   }
 
-  service { 'sentry-beat':
+  service { 'sentry-cron':
     ensure     => running,
     enable     => true,
     hasrestart => true,
-    require    => [ File['/etc/systemd/system/sentry-beat.service'],
+    require    => [ File['/etc/systemd/system/sentry-cron.service'],
                     User[$user],
                   ],
   }
 
-  # if the Sentry config changes, do a full restart of the Sentry beat worker
-  exec { 'restart-sentry-beat':
-    command     => '/usr/bin/systemctl stop sentry-beat; /usr/bin/systemctl start sentry-beat',
+  # if the Sentry config changes, do a full restart of the Sentry cron worker
+  exec { 'restart-sentry-cron':
+    command     => '/usr/bin/systemctl stop sentry-cron; /usr/bin/systemctl start sentry-cron',
     path        => '/bin:/usr/bin',
     refreshonly => true,
     subscribe   => Class['::sentry::config'],
@@ -98,9 +112,9 @@ class sentry::service (
     create_group => $group,
   }
 
-  logrotate::rule { 'sentry-beat':
+  logrotate::rule { 'sentry-cron':
     ensure       => present,
-    path         => '/var/log/sentry/sentry-beat.log',
+    path         => '/var/log/sentry/sentry-cron.log',
     create       => true,
     compress     => true,
     missingok    => true,
