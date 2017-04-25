@@ -2,6 +2,7 @@ class sentry::params {
   $admin_email        = 'root@localhost'
   $admin_password     = 'admin'
   $admin_user         = 'admin'
+  $bootstrap          = true
   $custom_config      = undef
   $custom_settings    = undef
   $db_host            = 'localhost'
