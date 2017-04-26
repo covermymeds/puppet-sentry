@@ -161,7 +161,7 @@ class sentry (
   file { "${path}/create_project.py":
     ensure  => present,
     mode    => '0755',
-    content => template('sentry/create_project.py.erb'),
+    source  => 'puppet:///modules/sentry/create_project.py',
     require => Class['::sentry::install'],
   }
 

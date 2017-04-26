@@ -49,7 +49,7 @@ define sentry::source::project (
   #
   if ! defined( Exec["Add ${organization}-${team}-${project}"] ) {
     exec { "Add ${organization}-${team}-${project}":
-      command => "${path}/bin/python ${path}/create_project.py -o ${organization} -t ${team} -l ${platform} -p ${project}",
+      command => "${path}/bin/python ${path}/create_project.py -o ${organization} -t ${team} -l ${platform} -p ${project} -s ${path}",
       creates => "${path}/dsn/${p}",
       require => File["${path}/create_project.py"],
     }
