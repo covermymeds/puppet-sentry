@@ -109,13 +109,13 @@ class sentry::install (
       path    => "${path}/bin:/usr/bin/:/usr/sbin:/bin",
       require => File["${path}/bootstrap.py"],
     }
+  }
 
-    file { "${path}/dsn":
-      ensure  => directory,
-      mode    => '0755',
-      owner   => $user,
-      group   => $group,
-      require => File["${path}/bootstrap.py"],
-    }
+  file { "${path}/dsn":
+    ensure  => directory,
+    mode    => '0755',
+    owner   => $user,
+    group   => $group,
+    require => File["${path}/bootstrap.py"],
   }
 }
