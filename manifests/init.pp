@@ -106,6 +106,7 @@ class sentry (
   $url                              = $sentry::params::url,
   Variant[Undef,String] $url_prefix = undef,
   $user                             = $sentry::params::user,
+  $cleanup_user                     = 'root',
   $version                          = $sentry::params::version,
   $vhost                            = $sentry::params::vhost,
   $wsgi_processes                   = $sentry::params::wsgi_processes,
@@ -156,7 +157,7 @@ class sentry (
   # run the Sentry cleanup process daily
   cron { 'sentry cleanup':
     command => "${path}/bin/sentry --config=${path} cleanup --days=30",
-    user    => $user,
+    user    => $cleanup_user,
     minute  => 15,
     hour    => 1,
     require => Class['::sentry::install'],
