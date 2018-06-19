@@ -96,6 +96,7 @@ class sentry (
   $redis_host                       = $sentry::params::redis_host,
   $redis_port                       = $sentry::params::redis_port,
   $secret_key                       = $sentry::params::secret_key,
+  $server_tokens                    = $sentry::params::server_tokens,
   $smtp_host                        = $sentry::params::smtp_host,
   $ssl_ca                           = $sentry::params::ssl_ca,
   $ssl_chain                        = $sentry::params::ssl_chain,
