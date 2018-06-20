@@ -32,6 +32,7 @@ class sentry::params {
   $redis_host         = 'localhost'
   $redis_port         = '6379'
   $secret_key         = fqdn_rand_string(50)
+  $server_tokens      = 'PROD'
   $smtp_host          = 'localhost'
   $ssl_ca             = undef
   $ssl_chain          = undef
